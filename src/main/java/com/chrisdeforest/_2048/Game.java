@@ -14,13 +14,13 @@ public class Game {
         this.board = new Tile[BOARD_SIZE][BOARD_SIZE];
         this.rand = new Random();
         this.support = new PropertyChangeSupport(this);
+        initializeBoard();
     }
     public void initializeBoard(){
-        int count = 0;
         for(int i = 0; i < BOARD_SIZE; i++){
             for(int j = 0; j < BOARD_SIZE; j++){
                 this.board[i][j] = new Tile();
-                this.support.firePropertyChange("value", count, ++count);
+                this.support.firePropertyChange("initialized", null, 0);
             }
         }
     }
@@ -50,7 +50,7 @@ public class Game {
                 }
             }
         }
-        this.support.firePropertyChange("newGame", null, 0);
+        this.support.firePropertyChange("newGame", null, rand.nextInt(10));
     }
     public void clearBoard(){
         for(int i = 0; i < BOARD_SIZE; i++){
@@ -64,7 +64,7 @@ public class Game {
         StringBuilder string = new StringBuilder();
         for(int i = 0; i < BOARD_SIZE; i++){
             for(int j = 0; j < BOARD_SIZE; j++){
-                string.append(String.valueOf(board[i][j].getValue())).append(" ");
+                string.append(board[i][j].getValue()).append(" ");
             }
             string.append("\n");
         }

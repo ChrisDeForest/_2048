@@ -1,10 +1,5 @@
 package com.chrisdeforest._2048;
 
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-
-import static javafx.scene.paint.Color.rgb;
-
 public class Tile {
     private int value;
     public Tile() {
@@ -39,10 +34,19 @@ public class Tile {
             default -> "rgb(0, 0, 0)";
         };
     }
-    public String getForeground(){
+    public String getTextColor(){
         if(this.value < 16)
             return "rgb(119, 110, 101)";
         else
             return "rgb(249, 246, 242)";
+    }
+    public String getFontSize(){
+        return switch (this.value){
+            case 0, 2, 4, 8, 16, 32, 64, 128, 256, 512 -> "40pt";
+            case 1024, 2048, 4096, 8192 -> "30pt";
+            case 16384, 32768, 65536 -> "25pt";
+            case 131072, 262144, 524288 -> "20pt";
+            default -> "18pt";
+        };
     }
 }

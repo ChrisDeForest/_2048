@@ -8,9 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
+
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -20,12 +19,11 @@ public class Controller extends Application implements PropertyChangeListener {
     private final static int SCORE_TILE_SIZE = 100;
     private final static int TILE_SIZE = 120;
     private final static int GRID_SIZE = 500;
+    private static Label status = new Label(""), scoreVal, bestScoreVal;
     private static Game game;
-    private Label status = new Label("");;
     private GridPane grid;
     @Override
     public void start(Stage stage) throws IOException {
-        System.out.println("START");
         // title, directions, how-to
         VBox info = makeInfo();
         // score and best score
@@ -55,10 +53,8 @@ public class Controller extends Application implements PropertyChangeListener {
 
     @Override
     public void init() throws Exception{
-        System.out.println("INIT");
         game = new Game();
         game.addPropertyChangeListener(this);
-        game.initializeBoard();
     }
     public static VBox makeInfo(){
         VBox info = new VBox();
@@ -107,9 +103,9 @@ public class Controller extends Application implements PropertyChangeListener {
         Label score = new Label("SCORE");
         score.setStyle("-fx-text-fill: rgb(242, 226, 208); -fx-font-weight: bold; -fx-font-size: 11pt;");
         // TODO do something with this so it can be updated later on
-        Label value = new Label("0");
-        value.getStyleClass().addAll("score-text", "bold");
-        left.getChildren().addAll(score, value);
+        scoreVal = new Label("0");
+        scoreVal.getStyleClass().addAll("score-text", "bold");
+        left.getChildren().addAll(score, scoreVal);
         left.getStyleClass().addAll( "grid", "score-margin");
         left.setAlignment(Pos.CENTER);
         VBox right = new VBox();
@@ -118,9 +114,9 @@ public class Controller extends Application implements PropertyChangeListener {
         Label best = new Label("BEST");
         best.setStyle("-fx-text-fill: rgb(242, 226, 208); -fx-font-weight: bold; -fx-font-size: 11pt;");
         // TODO do something with this so it can be updated later on
-        Label bestVal = new Label("0");
-        bestVal.getStyleClass().addAll("score-text", "bold");
-        right.getChildren().addAll(best, bestVal);
+        bestScoreVal= new Label("0");
+        bestScoreVal.getStyleClass().addAll("score-text", "bold");
+        right.getChildren().addAll(best, bestScoreVal);
         right.getStyleClass().addAll( "grid", "score-margin");
         right.setAlignment(Pos.CENTER);
         grid.add(left, 0, 0);
@@ -158,24 +154,32 @@ public class Controller extends Application implements PropertyChangeListener {
         }
     }
 
+    private Label updateTile(int i, int j) {
+        Label label = new Label(String.valueOf(game.board[i][j].getValue()));
+        String textColor = game.board[i][j].getTextColor();
+        String backgroundColor = game.board[i][j].getBackground();
+        String fontSize = game.board[i][j].getFontSize();
+        label.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";" +
+                " -fx-font-size: " + fontSize + ";");
+        if(label.getText().equals("0"))
+            label.setText("");
+        label.getStyleClass().addAll("margin", "game-label");
+        label.setPrefSize(TILE_SIZE, TILE_SIZE);
+        label.setMinSize(TILE_SIZE, TILE_SIZE);
+        label.setMaxSize(TILE_SIZE, TILE_SIZE);
+        return label;
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent event) {
-        if ("value".equals(event.getPropertyName())) {
-            int newValue = (int) event.getNewValue();
-            status.setText(String.valueOf(newValue));
+        if ("initialized".equals(event.getPropertyName())) {
+            status.setText("Click \"New Game\" to start a game");
         } else if("newGame".equals(event.getPropertyName())){
             status.setText("New game has been started: " + event.getNewValue());
             clearGrid();
             for(int i = 0; i < Game.BOARD_SIZE; i++){
                 for(int j = 0; j < Game.BOARD_SIZE; j++){
-                    Label label = new Label(String.valueOf(game.board[i][j].getValue()));
-                    String textColor = game.board[i][j].getForeground();
-                    String backgroundColor = game.board[i][j].getBackground();
-                    label.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor);
-                    if(label.getText().equals("0"))
-                        label.setText("");
-                    label.getStyleClass().addAll("margin", "game-label");
-                    grid.add(label, j, i);
+                    grid.add(updateTile(i, j), j, i);
                 }
             }
         }
