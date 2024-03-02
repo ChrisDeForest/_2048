@@ -5,7 +5,8 @@
 }
 .grid{
     -fx-background-color: rgb(187, 174, 160);
-    -fx-background-radius: 10
+    -fx-background-radius: 10;
+    -fx-alignment: center;
 }
 .game-title{
     -fx-font-size: 57pt;
@@ -18,15 +19,30 @@
     -fx-text-alignment: center;
     -fx-font-size: 14pt;
 }
-.directions-padding{
-    -fx-padding: 0 0 0 43;
+.game-label{
+    -fx-background-radius: 10;
+    -fx-border-radius: 1;
+    -fx-padding: 10 20;
+    -fx-font-weight: bold;
+    -fx-font-size: 40pt;
+    -fx-alignment: center;
+    -fx-min-height: 90pt;
+    -fx-min-width: 90pt;
 }
 .score-text{
     -fx-text-fill: rgb(255,255,255);
     -fx-font-size: 18pt;
 }
+.score-margin{
+    -fx-padding: 2px;
+    -fx-border-insets: 2px;
+    -fx-background-insets: 2px;
+}
 .directions-text{
     -fx-text-fill: rgb(118, 110, 101);
+}
+.directions-padding{
+    -fx-padding: 0 0 0 43;
 }
 .ul{
     -fx-underline: true;
@@ -38,20 +54,6 @@
     -fx-padding: 7px;
     -fx-border-insets: 7px;
     -fx-background-insets: 7px;
-}
-.score-margin{
-    -fx-padding: 2px;
-    -fx-border-insets: 2px;
-    -fx-background-insets: 2px;
-}
-.game-label{
-    -fx-background-color: #f0f0f0; /* Button background color */
-    -fx-background-radius: 10; /* Button background radius */
-    -fx-border-radius: 1; /* Button border radius */
-    -fx-padding: 10 20; /* Button padding */
-    -fx-font-weight: bold;
-    -fx-font-size: 40pt;
-    -fx-text-fill: rgb(118, 110, 101);
 }
 .border{
     -fx-border-width: 1px;

@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 import java.beans.PropertyChangeEvent;
@@ -15,12 +17,12 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 public class Controller extends Application implements PropertyChangeListener {
-    // constants
-    private final static int SCORE_SIZE = 100;
+    private final static int SCORE_TILE_SIZE = 100;
     private final static int TILE_SIZE = 120;
-    private final static int MAIN_GRID_SIZE = 500;
-    private Label status = new Label("Game not started yet");
+    private final static int GRID_SIZE = 500;
     private static Game game;
+    private Label status = new Label("");;
+    private GridPane grid;
     @Override
     public void start(Stage stage) throws IOException {
         System.out.println("START");
@@ -31,7 +33,7 @@ public class Controller extends Application implements PropertyChangeListener {
         // configuring the top section
         HBox top = makeTop(scoreAndBestScore, info);
         // main game grid
-        GridPane grid = makeGrid();
+        grid = makeGrid();
         // adding all sections to the main vbox
         VBox main = new VBox();
         main.getChildren().addAll(top, grid, status);
@@ -57,7 +59,6 @@ public class Controller extends Application implements PropertyChangeListener {
         game = new Game();
         game.addPropertyChangeListener(this);
         game.initializeBoard();
-
     }
     public static VBox makeInfo(){
         VBox info = new VBox();
@@ -79,26 +80,26 @@ public class Controller extends Application implements PropertyChangeListener {
 
     public static GridPane makeGrid(){
         GridPane grid = new GridPane();
-        grid.setMinSize(MAIN_GRID_SIZE, MAIN_GRID_SIZE);
-        grid.setMaxSize(MAIN_GRID_SIZE, MAIN_GRID_SIZE);
+        grid.setMinSize(GRID_SIZE, GRID_SIZE);
+        grid.setMaxSize(GRID_SIZE, GRID_SIZE);
         grid.getStyleClass().addAll("grid");
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 4; j++){
-                Label label = new Label();
-                label.setMinSize(TILE_SIZE, TILE_SIZE);
+                Label label = new Label("0");
+                if(label.getText().equals("0"))
+                    label.setText("");
                 label.getStyleClass().addAll("margin", "game-label");
-                label.setAlignment(Pos.CENTER);
+                label.setStyle("-fx-background-color: rgb(203, 193, 178);");
                 grid.add(label, i, j);
             }
         }
-        grid.setAlignment(Pos.CENTER);
         return grid;
     }
 
     public static GridPane makeScoreGrid(){
         GridPane grid = new GridPane();
-        grid.setMaxSize(SCORE_SIZE * 1.5, SCORE_SIZE * 0.75);
-        grid.setMinSize(SCORE_SIZE * 1.25, SCORE_SIZE * 0.75);
+        grid.setMaxSize(SCORE_TILE_SIZE * 1.5, SCORE_TILE_SIZE * 0.75);
+        grid.setMinSize(SCORE_TILE_SIZE * 1.25, SCORE_TILE_SIZE * 0.75);
         grid.getStyleClass().addAll("score-grid");
         VBox left = new VBox();
         left.setMinSize(100,60);
@@ -149,6 +150,14 @@ public class Controller extends Application implements PropertyChangeListener {
         return top;
     }
 
+    public void clearGrid(){
+        for(int i = 0; i < Game.BOARD_SIZE; i++){
+            for(int j = 0; j < Game.BOARD_SIZE; j++){
+                grid.getChildren().removeFirst();
+            }
+        }
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         if ("value".equals(event.getPropertyName())) {
@@ -156,6 +165,19 @@ public class Controller extends Application implements PropertyChangeListener {
             status.setText(String.valueOf(newValue));
         } else if("newGame".equals(event.getPropertyName())){
             status.setText("New game has been started: " + event.getNewValue());
+            clearGrid();
+            for(int i = 0; i < Game.BOARD_SIZE; i++){
+                for(int j = 0; j < Game.BOARD_SIZE; j++){
+                    Label label = new Label(String.valueOf(game.board[i][j].getValue()));
+                    String textColor = game.board[i][j].getForeground();
+                    String backgroundColor = game.board[i][j].getBackground();
+                    label.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor);
+                    if(label.getText().equals("0"))
+                        label.setText("");
+                    label.getStyleClass().addAll("margin", "game-label");
+                    grid.add(label, j, i);
+                }
+            }
         }
     }
 }

@@ -1,6 +1,9 @@
 package com.chrisdeforest._2048;
 
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
+import static javafx.scene.paint.Color.rgb;
 
 public class Tile {
     private int value;
@@ -19,27 +22,27 @@ public class Tile {
     public boolean isEmpty(){
         return this.value == 0;
     }
-    public Color getBackground(){
+    public String getBackground(){
         return switch (this.value) {
-            case 0 -> Color.color(204, 192, 179);
-            case 2 -> Color.color(238, 228, 218);
-            case 4 -> Color.color(237, 224, 200);
-            case 8 -> Color.color(242, 177, 121);
-            case 16 -> Color.color(245, 149, 99);
-            case 32 -> Color.color(246, 124, 95);
-            case 64 -> Color.color(246, 94, 59);
-            case 128 -> Color.color(237, 207, 114);
-            case 256 -> Color.color(237, 204, 97);
-            case 512 -> Color.color(237, 200, 80);
-            case 1024 -> Color.color(237, 197, 63);
-            case 2048 -> Color.color(237, 194, 46);
-            default -> Color.BLACK;
+            case 0 -> "rgb(204, 192, 179)";
+            case 2 -> "rgb(238, 228, 218)";
+            case 4 -> "rgb(237, 224, 200)";
+            case 8 -> "rgb(242, 177, 121)";
+            case 16 -> "rgb(245, 149, 99)";
+            case 32 -> "rgb(246, 124, 95)";
+            case 64 -> "rgb(246, 94, 59)";
+            case 128 -> "rgb(237, 207, 114)";
+            case 256 -> "rgb(237, 204, 97)";
+            case 512 -> "rgb(237, 200, 80)";
+            case 1024 -> "rgb(237, 197, 63)";
+            case 2048 -> "rgb(237, 194, 46)";
+            default -> "rgb(0, 0, 0)";
         };
     }
-    public Color getForeground(){
+    public String getForeground(){
         if(this.value < 16)
-            return Color.color(119, 110, 101);
+            return "rgb(119, 110, 101)";
         else
-            return Color.color(249, 246, 242);
+            return "rgb(249, 246, 242)";
     }
 }
