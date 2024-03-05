@@ -80,7 +80,22 @@ public class Game {
 
     }
     public void moveDown(){
-
+        for(int i = 0; i < BOARD_SIZE; i++){
+            Tile[] column = {board[0][i], board[1][i], board[2][i], board[3][i]};
+            List<Tile> newColumn = new LinkedList<>();
+            for(Tile t: column){
+                if(!(t.isEmpty()))
+                    newColumn.add(t);
+            }
+            int missing = 4 - newColumn.size();
+            for(int j = 0; j < missing; j++) {
+                newColumn.addFirst(new Tile());
+            }
+            for(int j = 0; j < BOARD_SIZE; j++){
+                board[j][i] = newColumn.get(j);
+            }
+        }
+        this.support.firePropertyChange("down", null, 0);
     }
     public void moveLeft(){
 
