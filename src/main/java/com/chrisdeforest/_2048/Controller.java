@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -39,6 +40,15 @@ public class Controller extends Application implements PropertyChangeListener {
         // scene and stage settings
         Scene scene = new Scene(main);
         scene.getStylesheets().add("file:src/main/resources/styles.css");
+        scene.setOnKeyPressed(keyEvent -> {
+            System.out.println(keyEvent.getCode());
+            switch(keyEvent.getCode()){
+                case UP, W, KP_UP:          game.moveUp();      break;
+                case RIGHT, D, KP_RIGHT:    game.moveRight();   break;
+                case DOWN, S, KP_DOWN:      game.moveDown();     break;
+                case LEFT, A, KP_LEFT:      game.moveLeft();    break;
+            }
+        });
         stage.setScene(scene);
         stage.setHeight(800);
         stage.setWidth(600);
@@ -102,7 +112,6 @@ public class Controller extends Application implements PropertyChangeListener {
         left.setMaxSize(125, 60);
         Label score = new Label("SCORE");
         score.setStyle("-fx-text-fill: rgb(242, 226, 208); -fx-font-weight: bold; -fx-font-size: 11pt;");
-        // TODO do something with this so it can be updated later on
         scoreVal = new Label("0");
         scoreVal.getStyleClass().addAll("score-text", "bold");
         left.getChildren().addAll(score, scoreVal);
@@ -154,34 +163,60 @@ public class Controller extends Application implements PropertyChangeListener {
         }
     }
 
-    private Label updateTile(int i, int j) {
-        Label label = new Label(String.valueOf(game.board[i][j].getValue()));
-        String textColor = game.board[i][j].getTextColor();
-        String backgroundColor = game.board[i][j].getBackground();
-        String fontSize = game.board[i][j].getFontSize();
-        label.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";" +
-                " -fx-font-size: " + fontSize + ";");
-        if(label.getText().equals("0"))
-            label.setText("");
-        label.getStyleClass().addAll("margin", "game-label");
-        label.setPrefSize(TILE_SIZE, TILE_SIZE);
-        label.setMinSize(TILE_SIZE, TILE_SIZE);
-        label.setMaxSize(TILE_SIZE, TILE_SIZE);
-        return label;
+    private void updateTiles() {
+        clearGrid();
+        Label label;
+        for(int i = 0; i < Game.BOARD_SIZE; i++){
+            for(int j = 0; j < Game.BOARD_SIZE; j++){
+                label = new Label(String.valueOf(game.getBoard()[i][j].getValue()));
+                String textColor = game.getBoard()[i][j].getTextColor();
+                String backgroundColor = game.getBoard()[i][j].getBackground();
+                String fontSize = game.getBoard()[i][j].getFontSize();
+                label.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";" +
+                        " -fx-font-size: " + fontSize + ";");
+                if(label.getText().equals("0"))
+                    label.setText("");
+                label.getStyleClass().addAll("margin", "game-label");
+                label.setPrefSize(TILE_SIZE, TILE_SIZE);
+                label.setMinSize(TILE_SIZE, TILE_SIZE);
+                label.setMaxSize(TILE_SIZE, TILE_SIZE);
+                grid.add(label, j, i);
+            }
+        }
+    }
+    private void updateScore(int val){
+        game.setScore(game.getScore() + val);
+        scoreVal.setText(String.valueOf(game.getScore()));
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent event) {
-        if ("initialized".equals(event.getPropertyName())) {
-            status.setText("Click \"New Game\" to start a game");
-        } else if("newGame".equals(event.getPropertyName())){
-            status.setText("New game has been started: " + event.getNewValue());
-            clearGrid();
-            for(int i = 0; i < Game.BOARD_SIZE; i++){
-                for(int j = 0; j < Game.BOARD_SIZE; j++){
-                    grid.add(updateTile(i, j), j, i);
-                }
-            }
+        switch(event.getPropertyName()){
+            case "initialized":
+                status.setText("Click \"New Game\" to start a game");
+                break;
+            case "newGame":
+                status.setText("New game has been started: " + event.getNewValue());
+                updateTiles();
+                break;
+            case "up":
+                status.setText("Moved up");
+                updateTiles();
+                break;
+            case "right":
+                status.setText("Moved right");
+                updateTiles();
+                break;
+            case "down":
+                status.setText("Moved down");
+                updateTiles();
+                break;
+            case "left":
+                status.setText("Moved left");
+                updateTiles();
+                break;
         }
     }
+    // TODO start doing move functions; do initial moves first, then add animations once they work;
+    // TODO also add appropriate functions in Game so that the moves are "rules" similar to "New Game"
 }
