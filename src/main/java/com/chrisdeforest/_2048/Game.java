@@ -25,7 +25,6 @@ public class Game {
         for(int i = 0; i < BOARD_SIZE; i++){
             for(int j = 0; j < BOARD_SIZE; j++){
                 this.board[i][j] = new Tile();
-                this.support.firePropertyChange("initialized", null, 0);
             }
         }
     }
@@ -58,47 +57,47 @@ public class Game {
         }
         this.support.firePropertyChange("newGame", null, rand.nextInt(10));
     }
-    public void moveUp(){
+    public void moveVertical(String dir){
         for(int i = 0; i < BOARD_SIZE; i++){
             Tile[] column = {board[0][i], board[1][i], board[2][i], board[3][i]};
             List<Tile> newColumn = new LinkedList<>();
             for(Tile t: column){
-                if(!(t.isEmpty()))
+                if(!t.isEmpty())
                     newColumn.add(t);
             }
             int missing = 4 - newColumn.size();
             for(int j = 0; j < missing; j++) {
-                newColumn.add(new Tile());
+                if(dir.equals("up"))
+                    newColumn.add(new Tile());
+                else {
+                    newColumn.addFirst(new Tile());
+                }
             }
-            for(int j = 0; j < BOARD_SIZE; j++){
+            for(int j = 0; j < BOARD_SIZE; j++)
                 board[j][i] = newColumn.get(j);
-            }
         }
-        this.support.firePropertyChange("up", null, 0);
+        this.support.firePropertyChange(dir, null, 0);
     }
-    public void moveRight(){
-
-    }
-    public void moveDown(){
+    public void moveHorizontal(String dir){
         for(int i = 0; i < BOARD_SIZE; i++){
-            Tile[] column = {board[0][i], board[1][i], board[2][i], board[3][i]};
-            List<Tile> newColumn = new LinkedList<>();
-            for(Tile t: column){
-                if(!(t.isEmpty()))
-                    newColumn.add(t);
+            Tile[] row = {board[i][0], board[i][1], board[i][2], board[i][3]};
+            List<Tile> newRow = new LinkedList<>();
+            for(Tile t: row){
+                if(!t.isEmpty())
+                    newRow.add(t);
             }
-            int missing = 4 - newColumn.size();
-            for(int j = 0; j < missing; j++) {
-                newColumn.addFirst(new Tile());
+            int missing = 4 - newRow.size();
+            for(int j = 0; j < missing; j++){
+                if(dir.equals("right"))
+                    newRow.addFirst(new Tile());
+                else {
+                    newRow.add(new Tile());
+                }
             }
-            for(int j = 0; j < BOARD_SIZE; j++){
-                board[j][i] = newColumn.get(j);
-            }
+            for(int j = 0; j < BOARD_SIZE; j++)
+                board[i][j] = newRow.get(j);
         }
-        this.support.firePropertyChange("down", null, 0);
-    }
-    public void moveLeft(){
-
+        this.support.firePropertyChange(dir, null, 0);
     }
     public int getValue(int r, int c){
         return this.board[r][c].getValue();
