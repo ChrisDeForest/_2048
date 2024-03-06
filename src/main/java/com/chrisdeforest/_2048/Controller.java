@@ -41,12 +41,12 @@ public class Controller extends Application implements PropertyChangeListener {
         scene.getStylesheets().add("file:src/main/resources/styles.css");
         scene.setOnKeyPressed(keyEvent -> {
             System.out.println(keyEvent.getCode());
-            switch(keyEvent.getCode()){
-                case UP, W, KP_UP:          game.moveVertical("up");        break;
-                case RIGHT, D, KP_RIGHT:    game.moveHorizontal("right");       break;
-                case DOWN, S, KP_DOWN:      game.moveVertical("down");      break;
-                case LEFT, A, KP_LEFT:      game.moveHorizontal("left");        break;
-            }
+//            switch(keyEvent.getCode()){
+//                case UP, W, KP_UP:          game.moveVertical("up", 0);        break;
+//                case RIGHT, D, KP_RIGHT:    game.moveHorizontal("right", 0);       break;
+//                case DOWN, S, KP_DOWN:      game.moveVertical("down", 0);      break;
+//                case LEFT, A, KP_LEFT:      game.moveHorizontal("left", 0);        break;
+//            }
         });
         stage.setScene(scene);
         stage.setHeight(800);
@@ -184,11 +184,9 @@ public class Controller extends Application implements PropertyChangeListener {
             }
         }
     }
-    private void updateScore(int val){
-        game.setScore(game.getScore() + val);
+    private void updateScore(){
         scoreVal.setText(String.valueOf(game.getScore()));
     }
-
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         switch(event.getPropertyName()){
@@ -198,32 +196,26 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "up":
                 status.setText("Moved up");
-                updateTiles(); // TODO once everything is implemented check to see if an update before is necessary
-//                game.condenseCol();
-//                game.moveVertical("up");
-//                updateTiles();
+                game.generateTile();
+                updateTiles();
                 break;
             case "right":
                 status.setText("Moved right");
-                updateTiles(); // TODO once everything is implemented check to see if an update before is necessary
-//                game.condenseRow();
-//                game.moveVertical("right");
-//                updateTiles();
+                game.generateTile();
+                updateTiles();
                 break;
             case "down":
                 status.setText("Moved down");
-                updateTiles(); // TODO once everything is implemented check to see if an update before is necessary
-//                game.condenseCol();
-//                game.moveVertical("down");
-//                updateTiles();
+                game.generateTile();
+                updateTiles();
                 break;
             case "left":
                 status.setText("Moved left");
-                updateTiles(); // TODO once everything is implemented check to see if an update before is necessary
-//                game.condenseRow();
-//                game.moveVertical("left");
-//                updateTiles();
+                game.generateTile();
+                updateTiles();
                 break;
+            case "score":
+                updateScore();
         }
     }
     // TODO start doing move functions; do initial moves first, then add animations once they work;
