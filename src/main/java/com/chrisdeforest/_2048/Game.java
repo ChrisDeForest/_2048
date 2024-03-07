@@ -149,6 +149,7 @@ public class Game {
                 }
             }
         }
+        this.setBestScore(this.getScore());
         this.support.firePropertyChange("score", null, 0);
         return list;
     }

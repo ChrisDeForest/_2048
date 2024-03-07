@@ -119,9 +119,8 @@ public class Controller extends Application implements PropertyChangeListener {
         VBox right = new VBox();
         right.setMinSize(110,60);
         right.setMaxSize(125, 60);
-        Label best = new Label("BEST");
+        Label best = new Label("BEST SCORE");
         best.setStyle("-fx-text-fill: rgb(242, 226, 208); -fx-font-weight: bold; -fx-font-size: 11pt;");
-        // TODO do something with this so it can be updated later on
         bestScoreVal= new Label("0");
         bestScoreVal.getStyleClass().addAll("score-text", "bold");
         right.getChildren().addAll(best, bestScoreVal);
@@ -139,9 +138,7 @@ public class Controller extends Application implements PropertyChangeListener {
         Label blank2 = new Label();
         blank2.setMinSize(50,40);
         Button newGame = new Button("New Game");
-        EventHandler<ActionEvent> newGameAction = event -> {
-            game.newGame();
-        };
+        EventHandler<ActionEvent> newGameAction = event -> game.newGame();
         newGame.setOnAction(newGameAction);
         newGame.getStyleClass().addAll("game-new-game", "bold");
         VBox rightSide = new VBox();
@@ -185,6 +182,7 @@ public class Controller extends Application implements PropertyChangeListener {
     }
     private void updateScore(){
         scoreVal.setText(String.valueOf(game.getScore()));
+        bestScoreVal.setText(String.valueOf(game.getBestScore()));
     }
     @Override
     public void propertyChange(PropertyChangeEvent event) {
