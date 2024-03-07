@@ -66,7 +66,7 @@ public class Game {
                 newCol.add(new Tile());
             // takes care of tile merging if tiles of the same value are moved up
             if(iteration == 0)
-                newCol = condenseCol(newCol, "up");
+                newCol = condense(newCol, "up");
             // updates the values in the Tile[][] board's current row to the new row values
             for(int j = 0; j < BOARD_SIZE; j++)
                 this.board[j][i] = newCol.get(j);
@@ -86,7 +86,7 @@ public class Game {
         if(iteration == 1)
             this.support.firePropertyChange("up", -10, 0);
     }
-    public void moveRight(){
+    public void moveRight(int iteration){
         boolean sameBoard = true;
         for(int i = 0; i < BOARD_SIZE; i++){
             Tile[] row = {board[i][0], board[i][1], board[i][2], board[i][3]};
@@ -100,12 +100,8 @@ public class Game {
             for(int j = 0; j < missingTiles; j++)
                 newRow.addFirst(new Tile());
             // takes care of tile merging if tiles of the same value are moved right
-            for(int j = 0; j < BOARD_SIZE - 1; j++){
-                if(newRow.get(j).getValue() != 0 && newRow.get(j + 1).getValue() != 0 && (newRow.get(j).getValue() == newRow.get(j + 1).getValue())){
-                    newRow.set(j + 1, new Tile(newRow.get(j).getValue() * 2));
-                    newRow.set(j, new Tile());
-                }
-            }
+            if(iteration == 0)
+                newRow = condense(newRow, "right");
             // updates the values in the Tile[][] board's current row to the new row values
             for(int j = 0; j < BOARD_SIZE; j++)
                 this.board[i][j] = newRow.get(j);
@@ -118,10 +114,12 @@ public class Game {
             }
         }
         // sending an update whether a tile will be generated or not
-        if(sameBoard)
-            this.support.firePropertyChange("right", null, 0);
-        else
-            this.support.firePropertyChange("right", null, 1);
+        if(sameBoard && iteration == 0)
+            this.support.firePropertyChange("right", -1, 0);
+        else if(!sameBoard && iteration == 0)
+            this.support.firePropertyChange("right", -1, 1);
+        if(iteration == 1)
+            this.support.firePropertyChange("right", -10, 0);
     }
     public void moveDown(int iteration){
         boolean sameBoard = true;
@@ -138,7 +136,7 @@ public class Game {
                 newCol.addFirst(new Tile());
             // takes care of tile merging if tiles of the same value are moved down
             if(iteration == 0)
-                newCol = condenseCol(newCol, "down");
+                newCol = condense(newCol, "down");
             // updates the values in the Tile[][] board's current row to the new row values
             for(int j = 0; j < BOARD_SIZE; j++)
                 this.board[j][i] = newCol.get(j);
@@ -158,7 +156,7 @@ public class Game {
         if(iteration == 1)
             this.support.firePropertyChange("down", -10, 0);
     }
-    public void moveLeft(){
+    public void moveLeft(int iteration){
         boolean sameBoard = true;
         for(int i = 0; i < BOARD_SIZE; i++){
             Tile[] row = {board[i][0], board[i][1], board[i][2], board[i][3]};
@@ -172,12 +170,8 @@ public class Game {
             for(int j = 0; j < missingTiles; j++)
                 newRow.add(new Tile());
             // takes care of tile merging if tiles of the same value are moved right
-            for(int j = 0; j < BOARD_SIZE - 1; j++){
-                if(newRow.get(j).getValue() != 0 && newRow.get(j + 1).getValue() != 0 && (newRow.get(j).getValue() == newRow.get(j + 1).getValue())){
-                    newRow.set(j, new Tile(newRow.get(j).getValue() * 2));
-                    newRow.set(j + 1, new Tile());
-                }
-            }
+            if(iteration == 0)
+                newRow = condense(newRow, "left");
             // updates the values in the Tile[][] board's current row to the new row values
             for(int j = 0; j < BOARD_SIZE; j++)
                 this.board[i][j] = newRow.get(j);
@@ -190,34 +184,28 @@ public class Game {
             }
         }
         // sending an update whether a tile will be generated or not
-        if(sameBoard)
-            this.support.firePropertyChange("left", null, 0);
-        else
-            this.support.firePropertyChange("left", null, 1);
+        if(sameBoard && iteration == 0)
+            this.support.firePropertyChange("left", -1, 0);
+        else if(!sameBoard && iteration == 0)
+            this.support.firePropertyChange("left", -1, 1);
+        if(iteration == 1)
+            this.support.firePropertyChange("left", -10, 0);
     }
-    public List<Tile> condenseCol(List<Tile> list, String direction){
-        if(direction.equals("up")){
+    public List<Tile> condense(List<Tile> list, String direction){
+        if(direction.equals("up") || direction.equals("left")){
             for(int j = 0; j < BOARD_SIZE - 1; j++){
                 if(list.get(j).getValue() != 0 && list.get(j + 1).getValue() != 0 && (list.get(j).getValue() == list.get(j + 1).getValue())){
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j + 1, new Tile());
                 }
             }
-        } else if(direction.equals("down")){
+        } else if(direction.equals("down") || direction.equals("right")){
             for(int j = BOARD_SIZE - 1; j > 0; j--){
                 if(list.get(j).getValue() != 0 && list.get(j - 1).getValue() != 0 && (list.get(j).getValue() == list.get(j - 1).getValue())){
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j - 1, new Tile());
                 }
             }
-        }
-        return list;
-    }
-    public List<Tile> condenseRow(List<Tile> list, String direction){
-        if(direction.equals("left")){
-
-        } else if(direction.equals("right")){
-
         }
         return list;
     }

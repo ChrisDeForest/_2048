@@ -43,9 +43,9 @@ public class Controller extends Application implements PropertyChangeListener {
             System.out.println(keyEvent.getCode());
             switch(keyEvent.getCode()){
                 case UP, W, KP_UP:          game.moveUp(0);          break;
-                case RIGHT, D, KP_RIGHT:    game.moveRight();       break;
+                case RIGHT, D, KP_RIGHT:    game.moveRight(0);       break;
                 case DOWN, S, KP_DOWN:      game.moveDown(0);        break;
-                case LEFT, A, KP_LEFT:      game.moveLeft();        break;
+                case LEFT, A, KP_LEFT:      game.moveLeft(0);        break;
             }
         });
         stage.setScene(scene);
@@ -204,6 +204,8 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "right":
                 status.setText("Moved right");
+                if((int)event.getOldValue() == -1)
+                    game.moveRight(1);
                 if((int)event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
@@ -218,6 +220,8 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "left":
                 status.setText("Moved left");
+                if((int)event.getOldValue() == -1)
+                    game.moveLeft(1);
                 if((int)event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
