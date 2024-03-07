@@ -41,12 +41,12 @@ public class Controller extends Application implements PropertyChangeListener {
         scene.getStylesheets().add("file:src/main/resources/styles.css");
         scene.setOnKeyPressed(keyEvent -> {
             System.out.println(keyEvent.getCode());
-//            switch(keyEvent.getCode()){
-//                case UP, W, KP_UP:          game.moveVertical("up", 0);        break;
-//                case RIGHT, D, KP_RIGHT:    game.moveHorizontal("right", 0);       break;
-//                case DOWN, S, KP_DOWN:      game.moveVertical("down", 0);      break;
-//                case LEFT, A, KP_LEFT:      game.moveHorizontal("left", 0);        break;
-//            }
+            switch(keyEvent.getCode()){
+                case UP, W, KP_UP:          game.moveUp(0);          break;
+                case RIGHT, D, KP_RIGHT:    game.moveRight();       break;
+                case DOWN, S, KP_DOWN:      game.moveDown(0);        break;
+                case LEFT, A, KP_LEFT:      game.moveLeft();        break;
+            }
         });
         stage.setScene(scene);
         stage.setHeight(800);
@@ -196,22 +196,30 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "up":
                 status.setText("Moved up");
-                game.generateTile();
+                if((int)event.getOldValue() == -1)
+                    game.moveUp(1);
+                if((int)event.getNewValue() == 1)
+                    game.generateTile();
                 updateTiles();
                 break;
             case "right":
                 status.setText("Moved right");
-                game.generateTile();
+                if((int)event.getNewValue() == 1)
+                    game.generateTile();
                 updateTiles();
                 break;
             case "down":
                 status.setText("Moved down");
-                game.generateTile();
+                if((int)event.getOldValue() == -1)
+                    game.moveDown(1);
+                if((int)event.getNewValue() == 1)
+                    game.generateTile();
                 updateTiles();
                 break;
             case "left":
                 status.setText("Moved left");
-                game.generateTile();
+                if((int)event.getNewValue() == 1)
+                    game.generateTile();
                 updateTiles();
                 break;
             case "score":
