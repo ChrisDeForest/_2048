@@ -10,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -42,10 +41,10 @@ public class Controller extends Application implements PropertyChangeListener {
         scene.setOnKeyPressed(keyEvent -> {
             System.out.println(keyEvent.getCode());
             switch(keyEvent.getCode()){
-                case UP, W, KP_UP:          game.moveUp(0);          break;
-                case RIGHT, D, KP_RIGHT:    game.moveRight(0);       break;
-                case DOWN, S, KP_DOWN:      game.moveDown(0);        break;
-                case LEFT, A, KP_LEFT:      game.moveLeft(0);        break;
+                case UP, W, KP_UP:          game.moveVertical(0, "up");            break;
+                case RIGHT, D, KP_RIGHT:    game.moveHorizontal(0, "right");       break;
+                case DOWN, S, KP_DOWN:      game.moveVertical(0, "down");          break;
+                case LEFT, A, KP_LEFT:      game.moveHorizontal(0, "left");        break;
             }
         });
         stage.setScene(scene);
@@ -197,7 +196,7 @@ public class Controller extends Application implements PropertyChangeListener {
             case "up":
                 status.setText("Moved up");
                 if((int)event.getOldValue() == -1)
-                    game.moveUp(1);
+                    game.moveVertical(1, "up");
                 if((int)event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
@@ -205,7 +204,7 @@ public class Controller extends Application implements PropertyChangeListener {
             case "right":
                 status.setText("Moved right");
                 if((int)event.getOldValue() == -1)
-                    game.moveRight(1);
+                    game.moveHorizontal(1, "right");
                 if((int)event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
@@ -213,7 +212,7 @@ public class Controller extends Application implements PropertyChangeListener {
             case "down":
                 status.setText("Moved down");
                 if((int)event.getOldValue() == -1)
-                    game.moveDown(1);
+                    game.moveVertical(1, "down");
                 if((int)event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
@@ -221,7 +220,7 @@ public class Controller extends Application implements PropertyChangeListener {
             case "left":
                 status.setText("Moved left");
                 if((int)event.getOldValue() == -1)
-                    game.moveLeft(1);
+                    game.moveHorizontal(1, "left");
                 if((int)event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
@@ -230,6 +229,4 @@ public class Controller extends Application implements PropertyChangeListener {
                 updateScore();
         }
     }
-    // TODO start doing move functions; do initial moves first, then add animations once they work;
-    // TODO also add appropriate functions in Game so that the moves are "rules" similar to "New Game"
 }

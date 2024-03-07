@@ -51,22 +51,27 @@ public class Game {
         }
         this.board[r1][c1].setValue(t1);
     }
-    public void moveUp(int iteration){
+    public void moveVertical(int iteration, String direction){
         boolean sameBoard = true;
-        for(int i = 0; i < BOARD_SIZE; i++){
+        for(int i = 0; i < BOARD_SIZE; i++) {
             Tile[] col = {board[0][i], board[1][i], board[2][i], board[3][i]};
             List<Tile> newCol = new LinkedList<>();
-            for(Tile t: col){
-                if(!t.isEmpty())
+            for (Tile t : col) {
+                if (!t.isEmpty())
                     newCol.add(t);
             }
             // adds back the missing values once values have been moved around
             int missingTiles = 4 - newCol.size();
-            for(int j = 0; j < missingTiles; j++)
-                newCol.add(new Tile());
+            for(int j = 0; j < missingTiles; j++){
+                if(direction.equals("up"))
+                    newCol.add(new Tile());
+                else {
+                    newCol.addFirst(new Tile());
+                }
+            }
             // takes care of tile merging if tiles of the same value are moved up
             if(iteration == 0)
-                newCol = condense(newCol, "up");
+                newCol = condense(newCol, direction);
             // updates the values in the Tile[][] board's current row to the new row values
             for(int j = 0; j < BOARD_SIZE; j++)
                 this.board[j][i] = newCol.get(j);
@@ -80,28 +85,33 @@ public class Game {
         }
         // sending an update whether a tile will be generated or not
         if(sameBoard && iteration == 0)
-            this.support.firePropertyChange("up", -1, 0);
+            this.support.firePropertyChange(direction, -1, 0);
         else if(!sameBoard && iteration == 0)
-            this.support.firePropertyChange("up", -1, 1);
+            this.support.firePropertyChange(direction, -1, 1);
         if(iteration == 1)
-            this.support.firePropertyChange("up", -10, 0);
+            this.support.firePropertyChange(direction, -10, 0);
     }
-    public void moveRight(int iteration){
+    public void moveHorizontal(int iteration, String direction){
         boolean sameBoard = true;
-        for(int i = 0; i < BOARD_SIZE; i++){
+        for(int i = 0; i < BOARD_SIZE; i++) {
             Tile[] row = {board[i][0], board[i][1], board[i][2], board[i][3]};
             List<Tile> newRow = new LinkedList<>();
-            for(Tile t: row){
-                if(!t.isEmpty())
+            for (Tile t : row) {
+                if (!t.isEmpty())
                     newRow.add(t);
             }
             // adds back the missing values once values have been moved around
             int missingTiles = 4 - newRow.size();
-            for(int j = 0; j < missingTiles; j++)
-                newRow.addFirst(new Tile());
+            for (int j = 0; j < missingTiles; j++){
+                if(direction.equals("left"))
+                    newRow.add(new Tile());
+                else {
+                    newRow.addFirst(new Tile());
+                }
+            }
             // takes care of tile merging if tiles of the same value are moved right
             if(iteration == 0)
-                newRow = condense(newRow, "right");
+                newRow = condense(newRow, direction);
             // updates the values in the Tile[][] board's current row to the new row values
             for(int j = 0; j < BOARD_SIZE; j++)
                 this.board[i][j] = newRow.get(j);
@@ -115,81 +125,11 @@ public class Game {
         }
         // sending an update whether a tile will be generated or not
         if(sameBoard && iteration == 0)
-            this.support.firePropertyChange("right", -1, 0);
+            this.support.firePropertyChange(direction, -1, 0);
         else if(!sameBoard && iteration == 0)
-            this.support.firePropertyChange("right", -1, 1);
+            this.support.firePropertyChange(direction, -1, 1);
         if(iteration == 1)
-            this.support.firePropertyChange("right", -10, 0);
-    }
-    public void moveDown(int iteration){
-        boolean sameBoard = true;
-        for(int i = 0; i < BOARD_SIZE; i++){
-            Tile[] col = {board[0][i], board[1][i], board[2][i], board[3][i]};
-            List<Tile> newCol = new LinkedList<>();
-            for(Tile t: col){
-                if(!t.isEmpty())
-                    newCol.add(t);
-            }
-            // adds back the missing values once values have been moved around
-            int missingTiles = 4 - newCol.size();
-            for(int j = 0; j < missingTiles; j++)
-                newCol.addFirst(new Tile());
-            // takes care of tile merging if tiles of the same value are moved down
-            if(iteration == 0)
-                newCol = condense(newCol, "down");
-            // updates the values in the Tile[][] board's current row to the new row values
-            for(int j = 0; j < BOARD_SIZE; j++)
-                this.board[j][i] = newCol.get(j);
-            // checking to see whether a tile should be generated or not
-            for(int j = 0; j < BOARD_SIZE; j++) {
-                if (!(((col[j].getValue() == newCol.get(j).getValue())))) {
-                    sameBoard = false;
-                    break;
-                }
-            }
-        }
-        // sending an update whether a tile will be generated or not
-        if(sameBoard && iteration == 0)
-            this.support.firePropertyChange("down", -1, 0);
-        else if(!sameBoard && iteration == 0)
-            this.support.firePropertyChange("down", -1, 1);
-        if(iteration == 1)
-            this.support.firePropertyChange("down", -10, 0);
-    }
-    public void moveLeft(int iteration){
-        boolean sameBoard = true;
-        for(int i = 0; i < BOARD_SIZE; i++){
-            Tile[] row = {board[i][0], board[i][1], board[i][2], board[i][3]};
-            List<Tile> newRow = new LinkedList<>();
-            for(Tile t: row){
-                if(!t.isEmpty())
-                    newRow.add(t);
-            }
-            // adds back the missing values once values have been moved around
-            int missingTiles = 4 - newRow.size();
-            for(int j = 0; j < missingTiles; j++)
-                newRow.add(new Tile());
-            // takes care of tile merging if tiles of the same value are moved right
-            if(iteration == 0)
-                newRow = condense(newRow, "left");
-            // updates the values in the Tile[][] board's current row to the new row values
-            for(int j = 0; j < BOARD_SIZE; j++)
-                this.board[i][j] = newRow.get(j);
-            // checking to see whether a tile should be generated or not
-            for(int j = 0; j < BOARD_SIZE; j++) {
-                if (!(((row[j].getValue() == newRow.get(j).getValue())))) {
-                    sameBoard = false;
-                    break;
-                }
-            }
-        }
-        // sending an update whether a tile will be generated or not
-        if(sameBoard && iteration == 0)
-            this.support.firePropertyChange("left", -1, 0);
-        else if(!sameBoard && iteration == 0)
-            this.support.firePropertyChange("left", -1, 1);
-        if(iteration == 1)
-            this.support.firePropertyChange("left", -10, 0);
+            this.support.firePropertyChange(direction, -10, 0);
     }
     public List<Tile> condense(List<Tile> list, String direction){
         if(direction.equals("up") || direction.equals("left")){
