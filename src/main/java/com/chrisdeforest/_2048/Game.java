@@ -137,6 +137,7 @@ public class Game {
                 if(list.get(j).getValue() != 0 && list.get(j + 1).getValue() != 0 && (list.get(j).getValue() == list.get(j + 1).getValue())){
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j + 1, new Tile());
+                    this.setScore(this.getScore() + (list.get(j).getValue()));
                 }
             }
         } else if(direction.equals("down") || direction.equals("right")){
@@ -144,9 +145,11 @@ public class Game {
                 if(list.get(j).getValue() != 0 && list.get(j - 1).getValue() != 0 && (list.get(j).getValue() == list.get(j - 1).getValue())){
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j - 1, new Tile());
+                    this.setScore(this.getScore() + (list.get(j).getValue()));
                 }
             }
         }
+        this.support.firePropertyChange("score", null, 0);
         return list;
     }
     public int getValue(int r, int c){
