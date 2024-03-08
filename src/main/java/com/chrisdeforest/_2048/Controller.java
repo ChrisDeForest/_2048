@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+
 // TODO remove status label underneath; add scrollable pane for information below; add tile appearing animation;
 // TODO add tile moving animation;
 
