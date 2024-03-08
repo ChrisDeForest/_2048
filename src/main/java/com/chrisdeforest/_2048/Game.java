@@ -11,15 +11,32 @@ public class Game {
     private PropertyChangeSupport support;
     private Tile[][] board;
     private Random rand;
-    private Boolean wonGame, continued;
+    private Boolean gameWon, continued, gameOver;
     private int score, bestScore;
     public Game(){
         this.board = new Tile[BOARD_SIZE][BOARD_SIZE];
         this.rand = new Random();
         this.support = new PropertyChangeSupport(this);
-        this.wonGame = false;
+        this.gameWon = false;
         this.continued = false;
+        this.gameOver = false;
         initializeBoard();
+    }
+    public Game(Game game){
+        this.board = new Tile[BOARD_SIZE][BOARD_SIZE];
+        this.rand = new Random();
+        this.support = new PropertyChangeSupport(this);
+        this.gameWon = game.gameWon;
+        this.continued = game.continued;
+        this.gameOver = game.gameOver;
+        this.score = game.score;
+        this.bestScore = game.bestScore;
+        initializeBoard();
+        for(int i = 0; i < BOARD_SIZE; i++){
+            for(int j = 0; j < BOARD_SIZE; j++){
+                this.board[i][j].setValue(game.board[i][j].getValue());
+            }
+        }
     }
     public void initializeBoard(){
         for(int i = 0; i < BOARD_SIZE; i++){
@@ -39,17 +56,23 @@ public class Game {
         clearBoard();
         this.score = 0;
         this.support.firePropertyChange("score", null, this.score);
+        this.gameWon = false;
+        this.continued = false;
+        this.gameOver = false;
         generateTile();
         generateTile();
         this.support.firePropertyChange("newGame", null, rand.nextInt(10));
     }
     public void generateTile(){
-        int t1 = (rand.nextInt(2) == 0) ? 2 : 4, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
-        while (!board[r1][c1].isEmpty()) {
-            r1 = rand.nextInt(4);
-            c1 = rand.nextInt(4);
+        if((!gameWon || continued) && !(gameOver)){
+            int t1 = (rand.nextInt(2) == 0) ? 64 : 128, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
+            while (!board[r1][c1].isEmpty()) {
+                r1 = rand.nextInt(4);
+                c1 = rand.nextInt(4);
+            }
+            this.board[r1][c1].setValue(t1);
         }
-        this.board[r1][c1].setValue(t1);
+        checkForGameOver();
     }
     public void moveVertical(int iteration, String direction){
         boolean sameBoard = true;
@@ -137,7 +160,7 @@ public class Game {
                 if(list.get(j).getValue() != 0 && list.get(j + 1).getValue() != 0 && (list.get(j).getValue() == list.get(j + 1).getValue())){
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j + 1, new Tile());
-                    this.setScore(this.getScore() + (list.get(j).getValue()));
+                    this.score = this.score + (list.get(j).getValue());
                 }
             }
         } else if(direction.equals("down") || direction.equals("right")){
@@ -145,13 +168,63 @@ public class Game {
                 if(list.get(j).getValue() != 0 && list.get(j - 1).getValue() != 0 && (list.get(j).getValue() == list.get(j - 1).getValue())){
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j - 1, new Tile());
-                    this.setScore(this.getScore() + (list.get(j).getValue()));
+                    this.score = this.score + (list.get(j).getValue());
                 }
             }
         }
-        this.setBestScore(this.getScore());
+        if(this.score >= this.bestScore)
+            this.setBestScore(this.score);
         this.support.firePropertyChange("score", null, 0);
+        checkForWin();
         return list;
+    }
+    public void checkForWin(){
+        for(int i = 0; i < BOARD_SIZE; i++){
+            for(int j = 0; j < BOARD_SIZE; j++){
+                if(board[i][j].getValue() == 2048){
+                    if(!this.continued) {
+                        this.gameWon = true;
+                        this.support.firePropertyChange("won game", null, 2048);
+                    }
+                }
+            }
+        }
+    }
+    public void checkForGameOver(){
+        int zeros = 0;
+        boolean canMove = true;
+        // checking for zeroes
+        for(int i = 0; i < BOARD_SIZE; i++){
+            for(int j = 0; j < BOARD_SIZE; j++){
+                if(board[i][j].getValue() == 0)
+                    zeros++;
+            }
+        }
+        // checking the board for possible moves if the board is full
+        if(zeros == 0) {
+            Game newGame = new Game(this);
+            newGame.moveVertical(0, "up");
+            if(newGame.equals(this)){
+                newGame.moveVertical(0, "down");
+                if(newGame.equals(this)){
+                    newGame.moveHorizontal(0, "right");
+                    if(newGame.equals(this)){
+                        newGame.moveHorizontal(0, "left");
+                        if(newGame.equals(this)){
+                            canMove = false;
+                        }
+                    }
+                }
+            }
+        }
+        if(zeros == 0 && !canMove) {
+            this.gameOver = true;
+            this.support.firePropertyChange("game over", null, 0);
+        }
+    }
+    public void continueGame(){
+        this.continued = true;
+        this.support.firePropertyChange("continue", null, 0);
     }
     public int getValue(int r, int c){
         return this.board[r][c].getValue();
@@ -165,11 +238,11 @@ public class Game {
     public void setBoard(Tile[][] b){
         this.board = b;
     }
-    public boolean getWonGame(){
-        return this.wonGame;
+    public boolean getGameWon(){
+        return this.gameWon;
     }
-    public void setWonGame(boolean wg){
-        this.wonGame = wg;
+    public void setGameWon(boolean gw){
+        this.gameWon = gw;
     }
     public boolean getContinued(){
         return this.continued;
@@ -202,10 +275,10 @@ public class Game {
     }
     @Override
     public boolean equals(Object object){
-        if(object instanceof Tile[][] oldBoard) {
+        if(object instanceof Game game) {
             for (int i = 0; i < BOARD_SIZE; i++) {
                 for (int j = 0; j < BOARD_SIZE; j++) {
-                    if (this.board[i][j] != oldBoard[i][j])
+                    if (this.board[i][j].getValue() != game.getBoard()[i][j].getValue())
                         return false;
                 }
             }

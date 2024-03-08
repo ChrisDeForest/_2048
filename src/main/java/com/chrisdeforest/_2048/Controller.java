@@ -7,12 +7,15 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+// TODO remove status label underneath; add scrollable pane for information below; add tile appearing animation;
+// TODO add tile moving animation;
 
 public class Controller extends Application implements PropertyChangeListener {
     private final static int SCORE_TILE_SIZE = 100;
@@ -21,6 +24,25 @@ public class Controller extends Application implements PropertyChangeListener {
     private static Label status = new Label(""), scoreVal, bestScoreVal;
     private static Game game;
     private GridPane grid;
+    private Scene scene;
+    private StackPane stack;
+    private final EventHandler<KeyEvent> keyEventHandler = keyEvent -> {
+        switch (keyEvent.getCode()) {
+            case UP, W, KP_UP:
+                game.moveVertical(0, "up");
+                break;
+            case RIGHT, D, KP_RIGHT:
+                game.moveHorizontal(0, "right");
+                break;
+            case DOWN, S, KP_DOWN:
+                game.moveVertical(0, "down");
+                break;
+            case LEFT, A, KP_LEFT:
+                game.moveHorizontal(0, "left");
+                break;
+        }
+    };
+
     @Override
     public void start(Stage stage) throws IOException {
         // title, directions, how-to
@@ -30,26 +52,20 @@ public class Controller extends Application implements PropertyChangeListener {
         // configuring the top section
         HBox top = makeTop(scoreAndBestScore, info);
         // main game grid
+        stack = new StackPane();
         grid = makeGrid();
+        stack.getChildren().addAll(grid, new Label());
         // adding all sections to the main vbox
         VBox main = new VBox();
-        main.getChildren().addAll(top, grid, status);
+        main.getChildren().addAll(top, stack, status);
         main.setAlignment(Pos.CENTER);
         // scene and stage settings
-        Scene scene = new Scene(main);
+        scene = new Scene(main);
         scene.getStylesheets().add("file:src/main/resources/styles.css");
-        scene.setOnKeyPressed(keyEvent -> {
-            System.out.println(keyEvent.getCode());
-            switch(keyEvent.getCode()){
-                case UP, W, KP_UP:          game.moveVertical(0, "up");            break;
-                case RIGHT, D, KP_RIGHT:    game.moveHorizontal(0, "right");       break;
-                case DOWN, S, KP_DOWN:      game.moveVertical(0, "down");          break;
-                case LEFT, A, KP_LEFT:      game.moveHorizontal(0, "left");        break;
-            }
-        });
+        scene.setOnKeyPressed(keyEventHandler);
         stage.setScene(scene);
         stage.setHeight(800);
-        stage.setWidth(600);
+        stage.setWidth(550);
         stage.setResizable(false);
         stage.setTitle("2048");
         stage.show();
@@ -61,11 +77,12 @@ public class Controller extends Application implements PropertyChangeListener {
     }
 
     @Override
-    public void init() throws Exception{
+    public void init() throws Exception {
         game = new Game();
         game.addPropertyChangeListener(this);
     }
-    public static VBox makeInfo(){
+
+    public static VBox makeInfo() {
         VBox info = new VBox();
         Label _2048 = new Label("2048");
         _2048.getStyleClass().addAll("game-title", "bold", "directions-text");
@@ -78,20 +95,19 @@ public class Controller extends Application implements PropertyChangeListener {
         Label howTo = new Label("How to play -->\n");
         howTo.getStyleClass().addAll("directions-padding", "ul", "bold", "directions-text");
         Label blank = new Label();
-        blank.setMinSize(50,35);
+        blank.setMinSize(50, 35);
         info.getChildren().addAll(_2048, dir, howTo, blank);
         return info;
     }
-
-    public static GridPane makeGrid(){
+    public static GridPane makeGrid() {
         GridPane grid = new GridPane();
         grid.setMinSize(GRID_SIZE, GRID_SIZE);
         grid.setMaxSize(GRID_SIZE, GRID_SIZE);
         grid.getStyleClass().addAll("grid");
-        for(int i = 0; i < 4; i++){
-            for(int j = 0; j < 4; j++){
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
                 Label label = new Label("0");
-                if(label.getText().equals("0"))
+                if (label.getText().equals("0"))
                     label.setText("");
                 label.getStyleClass().addAll("margin", "game-label");
                 label.setStyle("-fx-background-color: rgb(203, 193, 178);");
@@ -100,47 +116,45 @@ public class Controller extends Application implements PropertyChangeListener {
         }
         return grid;
     }
-
-    public static GridPane makeScoreGrid(){
+    public static GridPane makeScoreGrid() {
         GridPane grid = new GridPane();
         grid.setMaxSize(SCORE_TILE_SIZE * 1.5, SCORE_TILE_SIZE * 0.75);
         grid.setMinSize(SCORE_TILE_SIZE * 1.25, SCORE_TILE_SIZE * 0.75);
         grid.getStyleClass().addAll("score-grid");
         VBox left = new VBox();
-        left.setMinSize(100,60);
+        left.setMinSize(100, 60);
         left.setMaxSize(125, 60);
         Label score = new Label("SCORE");
         score.setStyle("-fx-text-fill: rgb(242, 226, 208); -fx-font-weight: bold; -fx-font-size: 11pt;");
         scoreVal = new Label("0");
         scoreVal.getStyleClass().addAll("score-text", "bold");
         left.getChildren().addAll(score, scoreVal);
-        left.getStyleClass().addAll( "grid", "score-margin");
+        left.getStyleClass().addAll("grid", "score-margin");
         left.setAlignment(Pos.CENTER);
         VBox right = new VBox();
-        right.setMinSize(110,60);
+        right.setMinSize(110, 60);
         right.setMaxSize(125, 60);
-        Label best = new Label("BEST SCORE");
+        Label best = new Label("BEST");
         best.setStyle("-fx-text-fill: rgb(242, 226, 208); -fx-font-weight: bold; -fx-font-size: 11pt;");
-        bestScoreVal= new Label("0");
+        bestScoreVal = new Label("0");
         bestScoreVal.getStyleClass().addAll("score-text", "bold");
         right.getChildren().addAll(best, bestScoreVal);
-        right.getStyleClass().addAll( "grid", "score-margin");
+        right.getStyleClass().addAll("grid", "score-margin");
         right.setAlignment(Pos.CENTER);
         grid.add(left, 0, 0);
         grid.add(right, 1, 0);
-        grid.setAlignment(Pos.CENTER);
+        grid.setAlignment(Pos.CENTER_RIGHT);
         return grid;
     }
-
-    public static HBox makeTop(GridPane scoreAndBestScore, VBox info){
+    public static HBox makeTop(GridPane scoreAndBestScore, VBox info) {
         Label blank = new Label();
         blank.setMinSize(105, 25);
         Label blank2 = new Label();
-        blank2.setMinSize(50,40);
+        blank2.setMinSize(50, 40);
         Button newGame = new Button("New Game");
         EventHandler<ActionEvent> newGameAction = event -> game.newGame();
         newGame.setOnAction(newGameAction);
-        newGame.getStyleClass().addAll("game-new-game", "bold");
+        newGame.getStyleClass().addAll("game-button", "bold");
         VBox rightSide = new VBox();
         rightSide.setMinSize(175, 125);
         rightSide.setAlignment(Pos.TOP_RIGHT);
@@ -150,27 +164,84 @@ public class Controller extends Application implements PropertyChangeListener {
         top.setAlignment(Pos.TOP_LEFT);
         return top;
     }
-
-    public void clearGrid(){
-        for(int i = 0; i < Game.BOARD_SIZE; i++){
-            for(int j = 0; j < Game.BOARD_SIZE; j++){
+    public StackPane makeWinScreen(){
+        // creating the stack pane and the background label
+        StackPane stack = new StackPane();
+        Label background = new Label();
+        background.setMinSize(GRID_SIZE, GRID_SIZE);
+        background.setMaxSize(GRID_SIZE, GRID_SIZE);
+        background.setPrefSize(GRID_SIZE, GRID_SIZE);
+        background.getStyleClass().addAll("game-win-lose-background");
+        // creating the "You win!" label
+        Label youWin = new Label("You win!");
+        youWin.setMinSize(TILE_SIZE, TILE_SIZE);
+        youWin.getStyleClass().addAll("bold", "game-win-lose-text");
+        // creating the game menu buttons, "keep going" and "try again"
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.CENTER);
+        Button keepGoing = new Button("Keep going");
+        keepGoing.getStyleClass().addAll("game-button", "bold");
+        EventHandler<ActionEvent> keepGoingAction = event -> game.continueGame();
+        keepGoing.setOnAction(keepGoingAction);
+        Label blank2 = new Label();
+        blank2.setMinSize(20, 20);
+        Button tryAgain = new Button("Try again");
+        EventHandler<ActionEvent> tryAgainAction = event -> game.newGame();
+        tryAgain.setOnAction(tryAgainAction);
+        tryAgain.getStyleClass().addAll("game-button", "bold");
+        hbox.getChildren().addAll(keepGoing, blank2, tryAgain);
+        // placing the prior elements into a vbox
+        VBox vbox = new VBox();
+        vbox.setAlignment(Pos.CENTER);
+        vbox.getChildren().addAll(youWin, hbox);
+        // placing the background and vbox into the stack pane
+        stack.getChildren().addAll(background, vbox);
+        return stack;
+    }
+    public StackPane makeGameOverScreen(){
+        // creating the background label
+        Label background = new Label();
+        background.setMinSize(GRID_SIZE, GRID_SIZE);
+        background.setMaxSize(GRID_SIZE, GRID_SIZE);
+        background.setPrefSize(GRID_SIZE, GRID_SIZE);
+        background.getStyleClass().addAll("game-win-lose-background");
+        // creating the game over text label
+        Label gameOver = new Label("Game over!");
+        gameOver.setMinSize(TILE_SIZE, TILE_SIZE);
+        gameOver.getStyleClass().addAll("bold", "game-win-lose-text");
+        // creating the try again button
+        Button tryAgain = new Button("Try again");
+        EventHandler<ActionEvent> tryAgainAction = event -> game.newGame();
+        tryAgain.setOnAction(tryAgainAction);
+        tryAgain.getStyleClass().addAll("game-button", "bold");
+        // arranging the elements within a group
+        VBox vbox = new VBox();
+        vbox.setAlignment(Pos.CENTER);
+        vbox.getChildren().addAll(gameOver, tryAgain);
+        // stacking elements appropriately
+        StackPane stack = new StackPane();
+        stack.getChildren().addAll(background, vbox);
+        return stack;
+    }
+    public void clearGrid() {
+        for (int i = 0; i < Game.BOARD_SIZE; i++) {
+            for (int j = 0; j < Game.BOARD_SIZE; j++) {
                 grid.getChildren().removeFirst();
             }
         }
     }
-
     private void updateTiles() {
         clearGrid();
         Label label;
-        for(int i = 0; i < Game.BOARD_SIZE; i++){
-            for(int j = 0; j < Game.BOARD_SIZE; j++){
+        for (int i = 0; i < Game.BOARD_SIZE; i++) {
+            for (int j = 0; j < Game.BOARD_SIZE; j++) {
                 label = new Label(String.valueOf(game.getBoard()[i][j].getValue()));
                 String textColor = game.getBoard()[i][j].getTextColor();
                 String backgroundColor = game.getBoard()[i][j].getBackground();
                 String fontSize = game.getBoard()[i][j].getFontSize();
                 label.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";" +
                         " -fx-font-size: " + fontSize + ";");
-                if(label.getText().equals("0"))
+                if (label.getText().equals("0"))
                     label.setText("");
                 label.getStyleClass().addAll("margin", "game-label");
                 label.setPrefSize(TILE_SIZE, TILE_SIZE);
@@ -180,51 +251,73 @@ public class Controller extends Application implements PropertyChangeListener {
             }
         }
     }
-    private void updateScore(){
+    private void updateScore() {
         scoreVal.setText(String.valueOf(game.getScore()));
         bestScoreVal.setText(String.valueOf(game.getBestScore()));
     }
     @Override
     public void propertyChange(PropertyChangeEvent event) {
-        switch(event.getPropertyName()){
+        switch (event.getPropertyName()) {
             case "newGame":
                 status.setText("New game has been started: " + event.getNewValue());
+                scene.setOnKeyPressed(keyEventHandler);
+                stack.getChildren().set(1, new Label());
                 updateTiles();
                 break;
             case "up":
                 status.setText("Moved up");
-                if((int)event.getOldValue() == -1)
+                if ((int) event.getOldValue() == -1)
                     game.moveVertical(1, "up");
-                if((int)event.getNewValue() == 1)
+                if ((int) event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
+                game.checkForWin();
                 break;
             case "right":
                 status.setText("Moved right");
-                if((int)event.getOldValue() == -1)
+                if ((int) event.getOldValue() == -1)
                     game.moveHorizontal(1, "right");
-                if((int)event.getNewValue() == 1)
+                if ((int) event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
+                game.checkForWin();
                 break;
             case "down":
                 status.setText("Moved down");
-                if((int)event.getOldValue() == -1)
+                if ((int) event.getOldValue() == -1)
                     game.moveVertical(1, "down");
-                if((int)event.getNewValue() == 1)
+                if ((int) event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
+                game.checkForWin();
                 break;
             case "left":
                 status.setText("Moved left");
-                if((int)event.getOldValue() == -1)
+                if ((int) event.getOldValue() == -1)
                     game.moveHorizontal(1, "left");
-                if((int)event.getNewValue() == 1)
+                if ((int) event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
+                game.checkForWin();
                 break;
             case "score":
                 updateScore();
+                break;
+            case "won game":
+                status.setText("You win! Congratulations!");
+                scene.setOnKeyPressed(null);
+                stack.getChildren().set(1, makeWinScreen());
+                break;
+            case "continue":
+                status.setText("Game continued");
+                scene.setOnKeyPressed(keyEventHandler);
+                stack.getChildren().set(1, new Label());
+                break;
+            case "game over":
+                status.setText("You lose");
+                scene.setOnKeyPressed(null);
+                stack.getChildren().set(1, makeGameOverScreen());
+                break;
         }
     }
 }

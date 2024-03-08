@@ -5,7 +5,7 @@
 }
 .grid{
     -fx-background-color: rgb(187, 174, 160);
-    -fx-background-radius: 10;
+    -fx-background-radius: 5;
     -fx-alignment: center;
 }
 .game-title{
@@ -13,20 +13,31 @@
     -fx-content-display: left;
     -fx-padding: 0 0 0 41;
 }
-.game-new-game{
+.game-button{
     -fx-background-color: rgb(144, 122, 102);
     -fx-text-fill: rgb(250, 246, 241);
     -fx-text-alignment: center;
     -fx-font-size: 14pt;
 }
 .game-label{
-    -fx-background-radius: 10;
+    -fx-background-radius: 5;
     -fx-border-radius: 1;
     -fx-padding: 10 20;
     -fx-font-weight: bold;
     -fx-alignment: center;
     -fx-min-height: 90pt;
     -fx-min-width: 90pt;
+}
+.game-win-lose-text{
+    -fx-alignment: center;
+    -fx-font-size: 46pt;
+    -fx-text-fill: rgb(250, 246, 241);
+    -fx-padding: 0 10 0 10;
+}
+.game-win-lose-background{
+    -fx-background-color: rgba(238, 236, 102, 0.35);
+    -fx-background-radius: 5;
+    -fx-alignment: center;
 }
 .score-text{
     -fx-text-fill: rgb(255,255,255);
