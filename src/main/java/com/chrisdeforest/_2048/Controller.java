@@ -2,6 +2,7 @@ package com.chrisdeforest._2048;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
+import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -203,6 +204,7 @@ public class Controller extends Application implements PropertyChangeListener {
         vbox.getChildren().addAll(youWin, hbox);
         // placing the background and vbox into the stack pane
         stack.getChildren().addAll(background, vbox);
+        stack.setOpacity(0);
         return stack;
     }
     public StackPane makeGameOverScreen(){
@@ -228,6 +230,7 @@ public class Controller extends Application implements PropertyChangeListener {
         // stacking elements appropriately
         StackPane stack = new StackPane();
         stack.getChildren().addAll(background, vbox);
+        stack.setOpacity(0);
         return stack;
     }
     public void clearGrid() {
@@ -280,6 +283,16 @@ public class Controller extends Application implements PropertyChangeListener {
         });
         scoreStack.getChildren().add(animatedScoreVal);
         parallel.play();
+    }
+    private void playAnimatedWinOrLoseScreen(StackPane stackScreen){
+        PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.5), stackScreen);
+        fadeTransition.setFromValue(0);
+        fadeTransition.setToValue(1);
+        pause.setOnFinished(event -> {
+            fadeTransition.play();
+        });
+        pause.play();
     }
     @Override
     public void propertyChange(PropertyChangeEvent event) {
@@ -337,6 +350,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 status.setText("You win! Congratulations!");
                 scene.setOnKeyPressed(null);
                 windowStack.getChildren().set(1, makeWinScreen());
+                playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));
                 break;
             case "continue":
                 status.setText("Game continued");
@@ -347,6 +361,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 status.setText("You lose");
                 scene.setOnKeyPressed(null);
                 windowStack.getChildren().set(1, makeGameOverScreen());
+                playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));
                 break;
         }
     }
