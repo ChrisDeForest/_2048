@@ -48,6 +48,9 @@
     -fx-border-insets: 2px;
     -fx-background-insets: 2px;
 }
+.score-text .animated{
+    -fx-text-fill: rgb(118, 110, 101);
+}
 .directions-text{
     -fx-text-fill: rgb(118, 110, 101);
 }

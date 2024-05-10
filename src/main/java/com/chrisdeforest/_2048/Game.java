@@ -11,8 +11,8 @@ public class Game {
     private PropertyChangeSupport support;
     private Tile[][] board;
     private Random rand;
-    private Boolean gameWon, continued, gameOver;
-    private int score, bestScore;
+    private Boolean gameWon, continued, gameOver, sameBoard;
+    private int oldScore, newScore, bestScore;
     public Game(){
         this.board = new Tile[BOARD_SIZE][BOARD_SIZE];
         this.rand = new Random();
@@ -20,6 +20,7 @@ public class Game {
         this.gameWon = false;
         this.continued = false;
         this.gameOver = false;
+        this.sameBoard = true;
         initializeBoard();
     }
     public Game(Game game){
@@ -29,7 +30,8 @@ public class Game {
         this.gameWon = game.gameWon;
         this.continued = game.continued;
         this.gameOver = game.gameOver;
-        this.score = game.score;
+        this.oldScore = game.oldScore;
+        this.newScore = game.newScore;
         this.bestScore = game.bestScore;
         initializeBoard();
         for(int i = 0; i < BOARD_SIZE; i++){
@@ -54,8 +56,9 @@ public class Game {
     }
     public void newGame(){
         clearBoard();
-        this.score = 0;
-        this.support.firePropertyChange("score", null, this.score);
+        this.oldScore = 0;
+        this.newScore = 0;
+        this.support.firePropertyChange("score", null, this.newScore);
         this.gameWon = false;
         this.continued = false;
         this.gameOver = false;
@@ -83,7 +86,7 @@ public class Game {
             this.support.firePropertyChange(direction, -10, 0);
     }
     public void moveVertical(int iteration, String direction){
-        boolean sameBoard = true;
+        sameBoard = true;
         for(int i = 0; i < BOARD_SIZE; i++) {
             Tile[] col = {board[0][i], board[1][i], board[2][i], board[3][i]};
             List<Tile> newCol = new LinkedList<>();
@@ -118,7 +121,7 @@ public class Game {
         generateTileDecision(sameBoard, iteration, direction);
     }
     public void moveHorizontal(int iteration, String direction){
-        boolean sameBoard = true;
+        sameBoard = true;
         for(int i = 0; i < BOARD_SIZE; i++) {
             Tile[] row = {board[i][0], board[i][1], board[i][2], board[i][3]};
             List<Tile> newRow = new LinkedList<>();
@@ -158,7 +161,7 @@ public class Game {
                 if(list.get(j).getValue() != 0 && list.get(j + 1).getValue() != 0 && (list.get(j).getValue() == list.get(j + 1).getValue())){
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j + 1, new Tile());
-                    this.score = this.score + (list.get(j).getValue());
+                    this.newScore = this.newScore + (list.get(j).getValue());
                     break;
                 }
             }
@@ -167,13 +170,13 @@ public class Game {
                 if(list.get(j).getValue() != 0 && list.get(j - 1).getValue() != 0 && (list.get(j).getValue() == list.get(j - 1).getValue())){
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j - 1, new Tile());
-                    this.score = this.score + (list.get(j).getValue());
+                    this.newScore = this.newScore + (list.get(j).getValue());
                     break;
                 }
             }
         }
-        if(this.score >= this.bestScore)
-            this.setBestScore(this.score);
+        if(this.newScore >= this.bestScore)
+            this.setBestScore(this.newScore);
         this.support.firePropertyChange("score", null, 0);
         checkForWin();
         return list;
@@ -250,17 +253,29 @@ public class Game {
     public void setContinued(boolean c){
         this.continued = c;
     }
-    public int getScore(){
-        return this.score;
+    public int getOldScore(){
+        return this.oldScore;
     }
-    public void setScore(int s){
-        this.score = s;
+    public void setOldScore(int s){
+        this.oldScore = s;
+    }
+    public int getNewScore(){
+        return this.newScore;
+    }
+    public void setNewScore(int s){
+        this.newScore = s;
     }
     public int getBestScore(){
         return this.bestScore;
     }
     public void setBestScore(int bs){
         this.bestScore = bs;
+    }
+    public boolean getSameBoard(){
+        return this.sameBoard;
+    }
+    public void setSameBoard(boolean sb){
+        this.sameBoard = sb;
     }
     @Override
     public String toString(){

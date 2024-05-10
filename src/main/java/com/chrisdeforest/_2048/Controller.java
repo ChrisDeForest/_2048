@@ -1,5 +1,8 @@
 package com.chrisdeforest._2048;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.SequentialTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -10,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -22,7 +26,7 @@ public class Controller extends Application implements PropertyChangeListener {
     private final static int SCORE_TILE_SIZE = 100;
     private final static int TILE_SIZE = 120;
     private final static int GRID_SIZE = 500;
-    private static Label status = new Label(""), scoreVal, bestScoreVal;
+    private static Label status = new Label(""), scoreVal, animatedScoreVal, bestScoreVal;
     private static Game game;
     private GridPane grid;
     private Scene scene;
@@ -129,7 +133,11 @@ public class Controller extends Application implements PropertyChangeListener {
         score.setStyle("-fx-text-fill: rgb(242, 226, 208); -fx-font-weight: bold; -fx-font-size: 11pt;");
         scoreVal = new Label("0");
         scoreVal.getStyleClass().addAll("score-text", "bold");
-        left.getChildren().addAll(score, scoreVal);
+        animatedScoreVal = new Label("");
+        animatedScoreVal.getStyleClass().addAll("score-text animated", "bold");
+        StackPane scoreStack = new StackPane();
+        scoreStack.getChildren().addAll(scoreVal, animatedScoreVal);
+        left.getChildren().addAll(score, scoreStack);
         left.getStyleClass().addAll("grid", "score-margin");
         left.setAlignment(Pos.CENTER);
         VBox right = new VBox();
@@ -232,6 +240,7 @@ public class Controller extends Application implements PropertyChangeListener {
         }
     }
     private void updateTiles() {
+        updateScore();
         clearGrid();
         Label label;
         for (int i = 0; i < Game.BOARD_SIZE; i++) {
@@ -253,8 +262,25 @@ public class Controller extends Application implements PropertyChangeListener {
         }
     }
     private void updateScore() {
-        scoreVal.setText(String.valueOf(game.getScore()));
+        scoreVal.setText(String.valueOf(game.getNewScore()));
         bestScoreVal.setText(String.valueOf(game.getBestScore()));
+        if(!game.getSameBoard() && (game.getOldScore() != game.getNewScore()))
+            playAnimatedScore();
+    }
+    private void playAnimatedScore(){
+        animatedScoreVal.setText("+" + (game.getNewScore() - game.getOldScore()));
+        animatedScoreVal.setTranslateY(0);
+        TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), animatedScoreVal);
+        translate.setByY(-30);
+        FadeTransition fade = new FadeTransition(Duration.seconds(0.5), animatedScoreVal);
+        fade.setFromValue(1.0);
+        fade.setToValue(0.0);
+        SequentialTransition sequential = new SequentialTransition(translate, fade);
+        sequential.setOnFinished(event -> {
+            animatedScoreVal.setText("");
+            animatedScoreVal.setOpacity(1.0);
+        });
+        sequential.play();
     }
     @Override
     public void propertyChange(PropertyChangeEvent event) {
@@ -267,6 +293,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "up":
                 status.setText("Moved up");
+                game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1)
                     game.moveVertical(1, "up");
                 if ((int) event.getNewValue() == 1)
@@ -276,6 +303,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "right":
                 status.setText("Moved right");
+                game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1)
                     game.moveHorizontal(1, "right");
                 if ((int) event.getNewValue() == 1)
@@ -285,6 +313,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "down":
                 status.setText("Moved down");
+                game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1)
                     game.moveVertical(1, "down");
                 if ((int) event.getNewValue() == 1)
@@ -294,6 +323,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "left":
                 status.setText("Moved left");
+                game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1)
                     game.moveHorizontal(1, "left");
                 if ((int) event.getNewValue() == 1)
