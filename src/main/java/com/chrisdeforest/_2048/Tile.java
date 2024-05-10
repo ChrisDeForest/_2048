@@ -14,9 +14,10 @@ public class Tile {
     private static final String COLOR_1024 = "rgb(237, 197, 63)";
     private static final String COLOR_2048 = "rgb(237, 194, 46)";
     private static final String COLOR_DEFAULT = "rgb(0, 0, 0)";
-    private int value;
+    private int value, moveGenerated;
     public Tile() {
         this.value = 0;
+        this.moveGenerated = -1;
     }
     public Tile(int v){
         this.value = v;
@@ -26,6 +27,12 @@ public class Tile {
     }
     public void setValue(int v){
         this.value = v;
+    }
+    public int getMoveGenerated(){
+        return this.moveGenerated;
+    }
+    public void setMoveGenerated(int mg){
+        this.moveGenerated = mg;
     }
     public boolean isEmpty(){
         return this.value == 0;

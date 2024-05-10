@@ -1,9 +1,6 @@
 package com.chrisdeforest._2048;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.ParallelTransition;
-import javafx.animation.PauseTransition;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -258,6 +255,10 @@ public class Controller extends Application implements PropertyChangeListener {
                 label.setPrefSize(TILE_SIZE, TILE_SIZE);
                 label.setMinSize(TILE_SIZE, TILE_SIZE);
                 label.setMaxSize(TILE_SIZE, TILE_SIZE);
+                if (game.getBoard()[i][j].getMoveGenerated() == game.getMoveCount()){
+                    label.setOpacity(0);
+                    playTileAppearAnimation(label);
+                }
                 grid.add(label, j, i);
             }
         }
@@ -294,6 +295,18 @@ public class Controller extends Application implements PropertyChangeListener {
         });
         pause.play();
     }
+    private void playTileAppearAnimation(Label label){
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.3), label);
+        fadeTransition.setFromValue(0);
+        fadeTransition.setToValue(1);
+        ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.3), label);
+        scaleTransition.setFromX(0);
+        scaleTransition.setFromY(0);
+        scaleTransition.setToX(1);
+        scaleTransition.setToY(1);
+        ParallelTransition parallelTransition = new ParallelTransition(fadeTransition, scaleTransition);
+        parallelTransition.play();
+    }
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         switch (event.getPropertyName()) {
@@ -306,8 +319,10 @@ public class Controller extends Application implements PropertyChangeListener {
             case "up":
                 status.setText("Moved up");
                 game.setOldScore(game.getNewScore());
-                if ((int) event.getOldValue() == -1)
+                if ((int) event.getOldValue() == -1) {
                     game.moveVertical(1, "up");
+                    game.setMoveCount(game.getMoveCount() + 1);
+                }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
@@ -316,8 +331,10 @@ public class Controller extends Application implements PropertyChangeListener {
             case "right":
                 status.setText("Moved right");
                 game.setOldScore(game.getNewScore());
-                if ((int) event.getOldValue() == -1)
+                if ((int) event.getOldValue() == -1) {
                     game.moveHorizontal(1, "right");
+                    game.setMoveCount(game.getMoveCount() + 1);
+                }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
@@ -326,8 +343,10 @@ public class Controller extends Application implements PropertyChangeListener {
             case "down":
                 status.setText("Moved down");
                 game.setOldScore(game.getNewScore());
-                if ((int) event.getOldValue() == -1)
+                if ((int) event.getOldValue() == -1) {
                     game.moveVertical(1, "down");
+                    game.setMoveCount(game.getMoveCount() + 1);
+                }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();
@@ -336,8 +355,10 @@ public class Controller extends Application implements PropertyChangeListener {
             case "left":
                 status.setText("Moved left");
                 game.setOldScore(game.getNewScore());
-                if ((int) event.getOldValue() == -1)
+                if ((int) event.getOldValue() == -1) {
                     game.moveHorizontal(1, "left");
+                    game.setMoveCount(game.getMoveCount() + 1);
+                }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile();
                 updateTiles();

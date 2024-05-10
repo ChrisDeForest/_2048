@@ -12,7 +12,7 @@ public class Game {
     private Tile[][] board;
     private Random rand;
     private Boolean gameWon, continued, gameOver, sameBoard;
-    private int oldScore, newScore, bestScore;
+    private int oldScore, newScore, bestScore, moveCount;
     public Game(){
         this.board = new Tile[BOARD_SIZE][BOARD_SIZE];
         this.rand = new Random();
@@ -21,6 +21,7 @@ public class Game {
         this.continued = false;
         this.gameOver = false;
         this.sameBoard = true;
+        this.moveCount = 0;
         initializeBoard();
     }
     public Game(Game game){
@@ -33,6 +34,8 @@ public class Game {
         this.oldScore = game.oldScore;
         this.newScore = game.newScore;
         this.bestScore = game.bestScore;
+        this.sameBoard = game.sameBoard;
+        this.moveCount = game.moveCount;
         initializeBoard();
         for(int i = 0; i < BOARD_SIZE; i++){
             for(int j = 0; j < BOARD_SIZE; j++){
@@ -51,6 +54,7 @@ public class Game {
         for(int i = 0; i < BOARD_SIZE; i++){
             for(int j = 0; j < BOARD_SIZE; j++){
                 board[i][j].setValue(0);
+                board[i][j].setMoveGenerated(-1);
             }
         }
     }
@@ -62,6 +66,7 @@ public class Game {
         this.gameWon = false;
         this.continued = false;
         this.gameOver = false;
+        this.moveCount = 0;
         generateTile();
         generateTile();
         this.support.firePropertyChange("newGame", null, rand.nextInt(10));
@@ -74,6 +79,7 @@ public class Game {
                 c1 = rand.nextInt(4);
             }
             this.board[r1][c1].setValue(t1);
+            this.board[r1][c1].setMoveGenerated(this.moveCount);
         }
         checkForGameOver();
     }
@@ -276,6 +282,12 @@ public class Game {
     }
     public void setSameBoard(boolean sb){
         this.sameBoard = sb;
+    }
+    public int getMoveCount(){
+        return this.moveCount;
+    }
+    public void setMoveCount(int mc){
+        this.moveCount = mc;
     }
     @Override
     public String toString(){
