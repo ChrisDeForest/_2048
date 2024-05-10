@@ -35,7 +35,7 @@
     -fx-padding: 0 10 0 10;
 }
 .game-win-lose-background{
-    -fx-background-color: rgba(238, 236, 102, 0.35);
+    -fx-background-color: rgba(200, 198, 64, 0.35);
     -fx-background-radius: 5;
     -fx-alignment: center;
 }

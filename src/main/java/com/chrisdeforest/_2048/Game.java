@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Game {
-    public final static int BOARD_SIZE = 4;
+    public final static int BOARD_SIZE = 4, WINNING_SCORE = 2048;
     private PropertyChangeSupport support;
     private Tile[][] board;
     private Random rand;
@@ -65,7 +65,7 @@ public class Game {
     }
     public void generateTile(){
         if((!gameWon || continued) && !(gameOver)){
-            int t1 = (rand.nextInt(2) == 0) ? 64 : 128, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
+            int t1 = ((rand.nextInt(1, 5) % 4) == 0) ? 2 : 4, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
             while (!board[r1][c1].isEmpty()) {
                 r1 = rand.nextInt(4);
                 c1 = rand.nextInt(4);
@@ -73,6 +73,14 @@ public class Game {
             this.board[r1][c1].setValue(t1);
         }
         checkForGameOver();
+    }
+    public void generateTileDecision(boolean sameBoard, int iteration, String direction){
+        if(sameBoard && iteration == 0)
+            this.support.firePropertyChange(direction, -1, 0);
+        else if(!sameBoard && iteration == 0)
+            this.support.firePropertyChange(direction, -1, 1);
+        if(iteration == 1)
+            this.support.firePropertyChange(direction, -10, 0);
     }
     public void moveVertical(int iteration, String direction){
         boolean sameBoard = true;
@@ -107,12 +115,7 @@ public class Game {
             }
         }
         // sending an update whether a tile will be generated or not
-        if(sameBoard && iteration == 0)
-            this.support.firePropertyChange(direction, -1, 0);
-        else if(!sameBoard && iteration == 0)
-            this.support.firePropertyChange(direction, -1, 1);
-        if(iteration == 1)
-            this.support.firePropertyChange(direction, -10, 0);
+        generateTileDecision(sameBoard, iteration, direction);
     }
     public void moveHorizontal(int iteration, String direction){
         boolean sameBoard = true;
@@ -147,12 +150,7 @@ public class Game {
             }
         }
         // sending an update whether a tile will be generated or not
-        if(sameBoard && iteration == 0)
-            this.support.firePropertyChange(direction, -1, 0);
-        else if(!sameBoard && iteration == 0)
-            this.support.firePropertyChange(direction, -1, 1);
-        if(iteration == 1)
-            this.support.firePropertyChange(direction, -10, 0);
+        generateTileDecision(sameBoard, iteration, direction);
     }
     public List<Tile> condense(List<Tile> list, String direction){
         if(direction.equals("up") || direction.equals("left")){
@@ -161,6 +159,7 @@ public class Game {
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j + 1, new Tile());
                     this.score = this.score + (list.get(j).getValue());
+                    break;
                 }
             }
         } else if(direction.equals("down") || direction.equals("right")){
@@ -169,6 +168,7 @@ public class Game {
                     list.set(j, new Tile(list.get(j).getValue() * 2));
                     list.set(j - 1, new Tile());
                     this.score = this.score + (list.get(j).getValue());
+                    break;
                 }
             }
         }
@@ -181,10 +181,10 @@ public class Game {
     public void checkForWin(){
         for(int i = 0; i < BOARD_SIZE; i++){
             for(int j = 0; j < BOARD_SIZE; j++){
-                if(board[i][j].getValue() == 2048){
+                if(board[i][j].getValue() == WINNING_SCORE){
                     if(!this.continued) {
                         this.gameWon = true;
-                        this.support.firePropertyChange("won game", null, 2048);
+                        this.support.firePropertyChange("won game", null, WINNING_SCORE);
                     }
                 }
             }
