@@ -31,11 +31,11 @@
 .game-win-lose-text{
     -fx-alignment: center;
     -fx-font-size: 46pt;
-    -fx-text-fill: rgb(250, 246, 241);
+    -fx-text-fill: rgb(118, 110, 101);
     -fx-padding: 0 10 0 10;
 }
 .game-win-lose-background{
-    -fx-background-color: rgba(200, 198, 64, 0.35);
+    -fx-background-color: rgba(218, 217, 208, 0.65);
     -fx-background-radius: 5;
     -fx-alignment: center;
 }
@@ -48,8 +48,8 @@
     -fx-border-insets: 2px;
     -fx-background-insets: 2px;
 }
-.score-text .animated{
-    -fx-text-fill: rgb(118, 110, 101);
+.animated{
+    -fx-text-fill: rgba(118, 110, 101, 0.60);
 }
 .directions-text{
     -fx-text-fill: rgb(118, 110, 101);

@@ -1,7 +1,7 @@
 package com.chrisdeforest._2048;
 
 import javafx.animation.FadeTransition;
-import javafx.animation.SequentialTransition;
+import javafx.animation.ParallelTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -26,11 +26,12 @@ public class Controller extends Application implements PropertyChangeListener {
     private final static int SCORE_TILE_SIZE = 100;
     private final static int TILE_SIZE = 120;
     private final static int GRID_SIZE = 500;
-    private static Label status = new Label(""), scoreVal, animatedScoreVal, bestScoreVal;
+    private static Label status = new Label(""), scoreVal, bestScoreVal;
     private static Game game;
     private GridPane grid;
     private Scene scene;
-    private StackPane stack;
+    private StackPane windowStack;
+    private static StackPane scoreStack = new StackPane();
     private final EventHandler<KeyEvent> keyEventHandler = keyEvent -> {
         switch (keyEvent.getCode()) {
             case UP, W, KP_UP:
@@ -57,12 +58,12 @@ public class Controller extends Application implements PropertyChangeListener {
         // configuring the top section
         HBox top = makeTop(scoreAndBestScore, info);
         // main game grid
-        stack = new StackPane();
+        windowStack = new StackPane();
         grid = makeGrid();
-        stack.getChildren().addAll(grid, new Label());
+        windowStack.getChildren().addAll(grid, new Label());
         // adding all sections to the main vbox
         VBox main = new VBox();
-        main.getChildren().addAll(top, stack, status);
+        main.getChildren().addAll(top, windowStack, status);
         main.setAlignment(Pos.CENTER);
         // scene and stage settings
         scene = new Scene(main);
@@ -133,10 +134,7 @@ public class Controller extends Application implements PropertyChangeListener {
         score.setStyle("-fx-text-fill: rgb(242, 226, 208); -fx-font-weight: bold; -fx-font-size: 11pt;");
         scoreVal = new Label("0");
         scoreVal.getStyleClass().addAll("score-text", "bold");
-        animatedScoreVal = new Label("");
-        animatedScoreVal.getStyleClass().addAll("score-text animated", "bold");
-        StackPane scoreStack = new StackPane();
-        scoreStack.getChildren().addAll(scoreVal, animatedScoreVal);
+        scoreStack.getChildren().addAll(scoreVal);
         left.getChildren().addAll(score, scoreStack);
         left.getStyleClass().addAll("grid", "score-margin");
         left.setAlignment(Pos.CENTER);
@@ -268,19 +266,20 @@ public class Controller extends Application implements PropertyChangeListener {
             playAnimatedScore();
     }
     private void playAnimatedScore(){
-        animatedScoreVal.setText("+" + (game.getNewScore() - game.getOldScore()));
+        Label animatedScoreVal = new Label("+" + (game.getNewScore() - game.getOldScore()));
+        animatedScoreVal.getStyleClass().addAll("score-text", "animated", "bold");
         animatedScoreVal.setTranslateY(0);
         TranslateTransition translate = new TranslateTransition(Duration.seconds(0.5), animatedScoreVal);
-        translate.setByY(-30);
+        translate.setByY(-45);
         FadeTransition fade = new FadeTransition(Duration.seconds(0.5), animatedScoreVal);
         fade.setFromValue(1.0);
         fade.setToValue(0.0);
-        SequentialTransition sequential = new SequentialTransition(translate, fade);
-        sequential.setOnFinished(event -> {
-            animatedScoreVal.setText("");
-            animatedScoreVal.setOpacity(1.0);
+        ParallelTransition parallel = new ParallelTransition(translate, fade);
+        parallel.setOnFinished(event -> {
+            scoreStack.getChildren().remove(animatedScoreVal);
         });
-        sequential.play();
+        scoreStack.getChildren().add(animatedScoreVal);
+        parallel.play();
     }
     @Override
     public void propertyChange(PropertyChangeEvent event) {
@@ -288,7 +287,7 @@ public class Controller extends Application implements PropertyChangeListener {
             case "newGame":
                 status.setText("New game has been started: " + event.getNewValue());
                 scene.setOnKeyPressed(keyEventHandler);
-                stack.getChildren().set(1, new Label());
+                windowStack.getChildren().set(1, new Label());
                 updateTiles();
                 break;
             case "up":
@@ -337,17 +336,17 @@ public class Controller extends Application implements PropertyChangeListener {
             case "won game":
                 status.setText("You win! Congratulations!");
                 scene.setOnKeyPressed(null);
-                stack.getChildren().set(1, makeWinScreen());
+                windowStack.getChildren().set(1, makeWinScreen());
                 break;
             case "continue":
                 status.setText("Game continued");
                 scene.setOnKeyPressed(keyEventHandler);
-                stack.getChildren().set(1, new Label());
+                windowStack.getChildren().set(1, new Label());
                 break;
             case "game over":
                 status.setText("You lose");
                 scene.setOnKeyPressed(null);
-                stack.getChildren().set(1, makeGameOverScreen());
+                windowStack.getChildren().set(1, makeGameOverScreen());
                 break;
         }
     }
