@@ -19,7 +19,7 @@
     -fx-text-alignment: center;
     -fx-font-size: 14pt;
 }
-.game-label{
+.game-tile{
     -fx-background-radius: 5;
     -fx-border-radius: 1;
     -fx-padding: 10 20;

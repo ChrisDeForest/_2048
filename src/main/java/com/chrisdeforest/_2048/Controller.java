@@ -17,18 +17,15 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
-// TODO remove status label underneath; add scrollable pane for information below; add tile appearing animation;
-// TODO add tile moving animation;
+// TODO add scrollable pane for information below;
 
 public class Controller extends Application implements PropertyChangeListener {
     private final static int SCORE_TILE_SIZE = 100;
     private final static int TILE_SIZE = 120;
     private final static int GRID_SIZE = 500;
-    private static Label status = new Label(""), scoreVal, bestScoreVal;
+    private static Label scoreVal, bestScoreVal;
+    private static Label[][] labelGrid = new Label[4][4];
     private static Game game;
-    private GridPane grid;
-    private Scene scene;
-    private StackPane windowStack;
     private static StackPane scoreStack = new StackPane();
     private final EventHandler<KeyEvent> keyEventHandler = keyEvent -> {
         switch (keyEvent.getCode()) {
@@ -46,7 +43,9 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
         }
     };
-
+    private GridPane grid;
+    private Scene scene;
+    private StackPane windowStack;
     @Override
     public void start(Stage stage) throws IOException {
         // title, directions, how-to
@@ -61,7 +60,7 @@ public class Controller extends Application implements PropertyChangeListener {
         windowStack.getChildren().addAll(grid, new Label());
         // adding all sections to the main vbox
         VBox main = new VBox();
-        main.getChildren().addAll(top, windowStack, status);
+        main.getChildren().addAll(top, windowStack);
         main.setAlignment(Pos.CENTER);
         // scene and stage settings
         scene = new Scene(main);
@@ -86,6 +85,24 @@ public class Controller extends Application implements PropertyChangeListener {
         game.addPropertyChangeListener(this);
     }
 
+    public GridPane makeGrid() {
+        GridPane grid = new GridPane();
+        grid.setMinSize(GRID_SIZE, GRID_SIZE);
+        grid.setMaxSize(GRID_SIZE, GRID_SIZE);
+        grid.getStyleClass().addAll("grid");
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                Label label = new Label("0");
+                if (label.getText().equals("0"))
+                    label.setText("");
+                label.getStyleClass().addAll("margin", "game-tile");
+                label.setStyle("-fx-background-color: rgb(203, 193, 178);");
+                grid.add(label, i, j);
+                labelGrid[i][j] = label;
+            }
+        }
+        return grid;
+    }
     public static VBox makeInfo() {
         VBox info = new VBox();
         Label _2048 = new Label("2048");
@@ -102,23 +119,6 @@ public class Controller extends Application implements PropertyChangeListener {
         blank.setMinSize(50, 35);
         info.getChildren().addAll(_2048, dir, howTo, blank);
         return info;
-    }
-    public static GridPane makeGrid() {
-        GridPane grid = new GridPane();
-        grid.setMinSize(GRID_SIZE, GRID_SIZE);
-        grid.setMaxSize(GRID_SIZE, GRID_SIZE);
-        grid.getStyleClass().addAll("grid");
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                Label label = new Label("0");
-                if (label.getText().equals("0"))
-                    label.setText("");
-                label.getStyleClass().addAll("margin", "game-label");
-                label.setStyle("-fx-background-color: rgb(203, 193, 178);");
-                grid.add(label, i, j);
-            }
-        }
-        return grid;
     }
     public static GridPane makeScoreGrid() {
         GridPane grid = new GridPane();
@@ -251,7 +251,7 @@ public class Controller extends Application implements PropertyChangeListener {
                         " -fx-font-size: " + fontSize + ";");
                 if (label.getText().equals("0"))
                     label.setText("");
-                label.getStyleClass().addAll("margin", "game-label");
+                label.getStyleClass().addAll("margin", "game-tile");
                 label.setPrefSize(TILE_SIZE, TILE_SIZE);
                 label.setMinSize(TILE_SIZE, TILE_SIZE);
                 label.setMaxSize(TILE_SIZE, TILE_SIZE);
@@ -307,60 +307,79 @@ public class Controller extends Application implements PropertyChangeListener {
         ParallelTransition parallelTransition = new ParallelTransition(fadeTransition, scaleTransition);
         parallelTransition.play();
     }
+    public void playTileMoveAnimation(int startX, int startY, int endX, int endY){
+        Label label = labelGrid[startX][startY];
+        double translateX = (endX - startX) * TILE_SIZE;
+        double translateY = (endY - startY) * TILE_SIZE;
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.5), label);
+        transition.setByY(translateX);
+        transition.setByX(translateY);
+        transition.setOnFinished(e -> {
+            label.setTranslateX(0);
+            label.setTranslateY(0);
+            grid.getChildren().remove(label);
+            grid.add(label, endX, endY);
+            labelGrid[endX][endY] = label;
+            /*
+            TODO this is causing issues after the first iteration because it just sets the tile to null without ever
+            TODO replacing the tile at the value
+            TODO maybe create a method that generates new Labels with the proper styling and whatnot
+            TODO figure out a way to do proper animations for all tiles before calling updateTiles(), probably do
+            TODO the animations within that function so the screen waits for the animation to finish before proceeding
+             */
+            labelGrid[startX][startY] = null;
+        });
+        transition.play();
+    }
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         switch (event.getPropertyName()) {
             case "newGame":
-                status.setText("New game has been started: " + event.getNewValue());
                 scene.setOnKeyPressed(keyEventHandler);
                 windowStack.getChildren().set(1, new Label());
                 updateTiles();
                 break;
             case "up":
-                status.setText("Moved up");
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveVertical(1, "up");
                     game.setMoveCount(game.getMoveCount() + 1);
                 }
                 if ((int) event.getNewValue() == 1)
-                    game.generateTile();
-                updateTiles();
+                    game.generateTile(game.getDebug());
+                //updateTiles();
                 game.checkForWin();
                 break;
             case "right":
-                status.setText("Moved right");
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveHorizontal(1, "right");
                     game.setMoveCount(game.getMoveCount() + 1);
                 }
                 if ((int) event.getNewValue() == 1)
-                    game.generateTile();
+                    game.generateTile(game.getDebug());
                 updateTiles();
                 game.checkForWin();
                 break;
             case "down":
-                status.setText("Moved down");
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveVertical(1, "down");
                     game.setMoveCount(game.getMoveCount() + 1);
                 }
                 if ((int) event.getNewValue() == 1)
-                    game.generateTile();
+                    game.generateTile(game.getDebug());
                 updateTiles();
                 game.checkForWin();
                 break;
             case "left":
-                status.setText("Moved left");
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveHorizontal(1, "left");
                     game.setMoveCount(game.getMoveCount() + 1);
                 }
                 if ((int) event.getNewValue() == 1)
-                    game.generateTile();
+                    game.generateTile(game.getDebug());
                 updateTiles();
                 game.checkForWin();
                 break;
@@ -368,18 +387,15 @@ public class Controller extends Application implements PropertyChangeListener {
                 updateScore();
                 break;
             case "won game":
-                status.setText("You win! Congratulations!");
                 scene.setOnKeyPressed(null);
                 windowStack.getChildren().set(1, makeWinScreen());
                 playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));
                 break;
             case "continue":
-                status.setText("Game continued");
                 scene.setOnKeyPressed(keyEventHandler);
                 windowStack.getChildren().set(1, new Label());
                 break;
             case "game over":
-                status.setText("You lose");
                 scene.setOnKeyPressed(null);
                 windowStack.getChildren().set(1, makeGameOverScreen());
                 playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));

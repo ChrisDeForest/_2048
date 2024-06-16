@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Random;
 
 public class Game {
+    /* !!! ONLY CHANGE THIS IF YOU KNOW WHAT YOU ARE DOING !!! */
+    private boolean debug = true;
     public final static int BOARD_SIZE = 4, WINNING_SCORE = 2048;
     private PropertyChangeSupport support;
     private Tile[][] board;
@@ -36,6 +38,7 @@ public class Game {
         this.bestScore = game.bestScore;
         this.sameBoard = game.sameBoard;
         this.moveCount = game.moveCount;
+        this.debug = game.debug;
         initializeBoard();
         for(int i = 0; i < BOARD_SIZE; i++){
             for(int j = 0; j < BOARD_SIZE; j++){
@@ -67,19 +70,25 @@ public class Game {
         this.continued = false;
         this.gameOver = false;
         this.moveCount = 0;
-        generateTile();
-        generateTile();
+        generateTile(this.debug);
+        generateTile(this.debug);
         this.support.firePropertyChange("newGame", null, rand.nextInt(10));
     }
-    public void generateTile(){
-        if((!gameWon || continued) && !(gameOver)){
-            int t1 = ((rand.nextInt(1, 5) % 4) == 0) ? 2 : 4, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
-            while (!board[r1][c1].isEmpty()) {
-                r1 = rand.nextInt(4);
-                c1 = rand.nextInt(4);
+    public void generateTile(boolean debug){
+        if(debug){
+            int num = 2;
+            this.board[num][num].setValue(2);
+            this.board[num][num].setMoveGenerated(this.moveCount);
+        } else {
+            if ((!gameWon || continued) && !(gameOver)) {
+                int t1 = ((rand.nextInt(1, 5) % 4) == 0) ? 2 : 4, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
+                while (!board[r1][c1].isEmpty()) {
+                    r1 = rand.nextInt(4);
+                    c1 = rand.nextInt(4);
+                }
+                this.board[r1][c1].setValue(t1);
+                this.board[r1][c1].setMoveGenerated(this.moveCount);
             }
-            this.board[r1][c1].setValue(t1);
-            this.board[r1][c1].setMoveGenerated(this.moveCount);
         }
         checkForGameOver();
     }
@@ -288,6 +297,9 @@ public class Game {
     }
     public void setMoveCount(int mc){
         this.moveCount = mc;
+    }
+    public boolean getDebug(){
+        return this.debug;
     }
     @Override
     public String toString(){
