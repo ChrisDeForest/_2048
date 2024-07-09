@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Random;
 
 public class Game {
-    /* !!! ONLY CHANGE THIS IF YOU KNOW WHAT YOU ARE DOING !!! */
+    /* !!! ONLY CHANGE DEBUG IF YOU KNOW WHAT YOU ARE DOING !!! */
     private boolean debug = true;
     public final static int BOARD_SIZE = 4, WINNING_SCORE = 2048;
     private PropertyChangeSupport support;
     private Tile[][] board;
     private Random rand;
-    private Boolean gameWon, continued, gameOver, sameBoard;
+    private boolean gameWon, continued, gameOver, sameBoard;
     private int oldScore, newScore, bestScore, moveCount;
     public Game(){
         this.board = new Tile[BOARD_SIZE][BOARD_SIZE];
@@ -93,12 +93,14 @@ public class Game {
         checkForGameOver();
     }
     public void generateTileDecision(boolean sameBoard, int iteration, String direction){
-        if(sameBoard && iteration == 0)
+        if(sameBoard && iteration == 0) {
             this.support.firePropertyChange(direction, -1, 0);
-        else if(!sameBoard && iteration == 0)
+        } else if(!sameBoard && iteration == 0) {
+            incrementMoveCount();
             this.support.firePropertyChange(direction, -1, 1);
-        if(iteration == 1)
+        } if(iteration == 1) {
             this.support.firePropertyChange(direction, -10, 0);
+        }
     }
     public void moveVertical(int iteration, String direction){
         sameBoard = true;
@@ -222,19 +224,20 @@ public class Game {
         if(zeros == 0) {
             Game newGame = new Game(this);
             newGame.moveVertical(0, "up");
-            if(newGame.equals(this)){
+            if (newGame.equals(this)) {
                 newGame.moveVertical(0, "down");
-                if(newGame.equals(this)){
+                if (newGame.equals(this)) {
                     newGame.moveHorizontal(0, "right");
-                    if(newGame.equals(this)){
+                    if (newGame.equals(this)) {
                         newGame.moveHorizontal(0, "left");
-                        if(newGame.equals(this)){
+                        if (newGame.equals(this)) {
                             canMove = false;
                         }
                     }
                 }
             }
         }
+        // if there are no zero tiles left and no moves are possible, then the game is over
         if(zeros == 0 && !canMove) {
             this.gameOver = true;
             this.support.firePropertyChange("game over", null, 0);
@@ -298,8 +301,14 @@ public class Game {
     public void setMoveCount(int mc){
         this.moveCount = mc;
     }
+    public void incrementMoveCount(){
+        this.moveCount++;
+    }
     public boolean getDebug(){
         return this.debug;
+    }
+    public void setDebug(boolean dbg){
+        this.debug = dbg;
     }
     @Override
     public String toString(){

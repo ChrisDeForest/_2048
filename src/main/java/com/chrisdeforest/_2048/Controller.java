@@ -24,7 +24,7 @@ public class Controller extends Application implements PropertyChangeListener {
     private final static int TILE_SIZE = 120;
     private final static int GRID_SIZE = 500;
     private static Label scoreVal, bestScoreVal;
-    private static Label[][] labelGrid = new Label[4][4];
+    public static Label[][] labelGrid = new Label[4][4];
     private static Game game;
     private static StackPane scoreStack = new StackPane();
     private final EventHandler<KeyEvent> keyEventHandler = keyEvent -> {
@@ -42,8 +42,9 @@ public class Controller extends Application implements PropertyChangeListener {
                 game.moveHorizontal(0, "left");
                 break;
         }
+        System.out.println();
     };
-    private GridPane grid;
+    private static GridPane grid;
     private Scene scene;
     private StackPane windowStack;
     @Override
@@ -230,38 +231,42 @@ public class Controller extends Application implements PropertyChangeListener {
         stack.setOpacity(0);
         return stack;
     }
-    public void clearGrid() {
-        for (int i = 0; i < Game.BOARD_SIZE; i++) {
-            for (int j = 0; j < Game.BOARD_SIZE; j++) {
-                grid.getChildren().removeFirst();
-            }
-        }
-    }
-    private void updateTiles() {
+    private void updateTiles(boolean quick) {
         updateScore();
-        clearGrid();
-        Label label;
-        for (int i = 0; i < Game.BOARD_SIZE; i++) {
-            for (int j = 0; j < Game.BOARD_SIZE; j++) {
-                label = new Label(String.valueOf(game.getBoard()[i][j].getValue()));
-                String textColor = game.getBoard()[i][j].getTextColor();
-                String backgroundColor = game.getBoard()[i][j].getBackground();
-                String fontSize = game.getBoard()[i][j].getFontSize();
-                label.setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";" +
-                        " -fx-font-size: " + fontSize + ";");
-                if (label.getText().equals("0"))
-                    label.setText("");
-                label.getStyleClass().addAll("margin", "game-tile");
-                label.setPrefSize(TILE_SIZE, TILE_SIZE);
-                label.setMinSize(TILE_SIZE, TILE_SIZE);
-                label.setMaxSize(TILE_SIZE, TILE_SIZE);
-                if (game.getBoard()[i][j].getMoveGenerated() == game.getMoveCount()){
-                    label.setOpacity(0);
-                    playTileAppearAnimation(label);
+        // TODO ok so I can call it here and it still works, so I'm thinking about trying something with
+        // TODO loops so that it can count 0's in the direction it needs to move, then move '# of 0's' * size
+        // TODO spaces in that direction.
+        // TODO would need to add a direction parameter to updateTiles in order for that to work however.
+        playTileMoveAnimation(2, 2, 2, 0);
+        Duration time;
+        if(quick)
+            time = Duration.seconds(0);
+        else
+            time = Duration.seconds(0.2);
+        PauseTransition pause = new PauseTransition(time);
+        pause.setOnFinished(e->{
+            for (int i = 0; i < Game.BOARD_SIZE; i++) {
+                for (int j = 0; j < Game.BOARD_SIZE; j++) {
+                    labelGrid[i][j].setText(String.valueOf(game.getBoard()[j][i].getValue()));
+                    String textColor = game.getBoard()[i][j].getTextColor();
+                    String backgroundColor = game.getBoard()[i][j].getBackground();
+                    String fontSize = game.getBoard()[i][j].getFontSize();
+                    labelGrid[j][i].setStyle("-fx-background-color: " + backgroundColor + "; -fx-text-fill: " + textColor + ";" +
+                            " -fx-font-size: " + fontSize + ";");
+                    if (labelGrid[i][j].getText().equals("0"))
+                        labelGrid[i][j].setText("");
+                    labelGrid[j][i].getStyleClass().addAll("margin", "game-tile");
+                    if (game.getBoard()[i][j].getMoveGenerated() == game.getMoveCount() && !game.getBoard()[i][j].getAnimationPlayed()) {
+                        labelGrid[j][i].setOpacity(0);
+                        playTileAppearAnimation(labelGrid[j][i]);
+                        game.getBoard()[i][j].setAnimationPlayed(true);
+                    }
                 }
-                grid.add(label, j, i);
             }
-        }
+        });
+        pause.play();
+        System.out.print(game.toString());
+        System.out.println("MoveCount:" + game.getMoveCount());
     }
     private void updateScore() {
         scoreVal.setText(String.valueOf(game.getNewScore()));
@@ -307,27 +312,19 @@ public class Controller extends Application implements PropertyChangeListener {
         ParallelTransition parallelTransition = new ParallelTransition(fadeTransition, scaleTransition);
         parallelTransition.play();
     }
+    // TODO figure out how to move each tile to its proper spot each time
     public void playTileMoveAnimation(int startX, int startY, int endX, int endY){
+        scene.setOnKeyPressed(null);
         Label label = labelGrid[startX][startY];
         double translateX = (endX - startX) * TILE_SIZE;
-        double translateY = (endY - startY) * TILE_SIZE;
-        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.5), label);
-        transition.setByY(translateX);
-        transition.setByX(translateY);
+        double translateY = (endY - startX) * TILE_SIZE;
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.2), label);
+        transition.setByX(translateX);
+        transition.setByY(translateY);
         transition.setOnFinished(e -> {
             label.setTranslateX(0);
             label.setTranslateY(0);
-            grid.getChildren().remove(label);
-            grid.add(label, endX, endY);
-            labelGrid[endX][endY] = label;
-            /*
-            TODO this is causing issues after the first iteration because it just sets the tile to null without ever
-            TODO replacing the tile at the value
-            TODO maybe create a method that generates new Labels with the proper styling and whatnot
-            TODO figure out a way to do proper animations for all tiles before calling updateTiles(), probably do
-            TODO the animations within that function so the screen waits for the animation to finish before proceeding
-             */
-            labelGrid[startX][startY] = null;
+            scene.setOnKeyPressed(keyEventHandler);
         });
         transition.play();
     }
@@ -337,50 +334,46 @@ public class Controller extends Application implements PropertyChangeListener {
             case "newGame":
                 scene.setOnKeyPressed(keyEventHandler);
                 windowStack.getChildren().set(1, new Label());
-                updateTiles();
+                updateTiles(true);
                 break;
             case "up":
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
-                    game.moveVertical(1, "up");
-                    game.setMoveCount(game.getMoveCount() + 1);
-                }
-                if ((int) event.getNewValue() == 1)
+                    game.moveVertical(1, "up");}
+                if ((int) event.getNewValue() == 1) {
                     game.generateTile(game.getDebug());
-                //updateTiles();
+                }
+                updateTiles(false);
                 game.checkForWin();
                 break;
             case "right":
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveHorizontal(1, "right");
-                    game.setMoveCount(game.getMoveCount() + 1);
                 }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile(game.getDebug());
-                updateTiles();
+                updateTiles(false);
                 game.checkForWin();
                 break;
             case "down":
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveVertical(1, "down");
-                    game.setMoveCount(game.getMoveCount() + 1);
                 }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile(game.getDebug());
-                updateTiles();
+                updateTiles(false);
                 game.checkForWin();
                 break;
             case "left":
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveHorizontal(1, "left");
-                    game.setMoveCount(game.getMoveCount() + 1);
                 }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile(game.getDebug());
-                updateTiles();
+                updateTiles(false);
                 game.checkForWin();
                 break;
             case "score":
