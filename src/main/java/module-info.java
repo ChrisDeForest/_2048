@@ -11,6 +11,7 @@ module com.chrisdeforest._2048 {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires java.desktop;
+    requires annotations;
 
     opens com.chrisdeforest._2048 to javafx.fxml;
     exports com.chrisdeforest._2048;

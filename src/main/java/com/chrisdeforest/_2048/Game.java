@@ -76,9 +76,15 @@ public class Game {
     }
     public void generateTile(boolean debug){
         if(debug){
-            int num = 2;
-            this.board[num][num].setValue(2);
-            this.board[num][num].setMoveGenerated(this.moveCount);
+            int pos = 0, num = 2;
+            this.board[pos][pos].setValue(num);
+            this.board[pos][pos].setMoveGenerated(this.moveCount);
+            this.board[pos+1][pos].setValue(num);
+            this.board[pos+1][pos].setMoveGenerated(this.moveCount);
+            this.board[pos+2][pos].setValue(num);
+            this.board[pos+2][pos].setMoveGenerated(this.moveCount);
+            this.board[pos+3][pos].setValue(num);
+            this.board[pos+3][pos].setMoveGenerated(this.moveCount);
         } else {
             if ((!gameWon || continued) && !(gameOver)) {
                 int t1 = ((rand.nextInt(1, 5) % 4) == 0) ? 2 : 4, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
