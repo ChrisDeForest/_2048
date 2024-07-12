@@ -22,11 +22,7 @@ import java.io.IOException;
 
 public class Controller extends Application implements PropertyChangeListener {
     private final static int SCORE_TILE_SIZE = 100, TILE_SIZE = 120, GRID_SIZE = 500;
-    private final static Duration ANIMATION_TIME = Duration.seconds(0.50);
-    private static Label scoreVal, bestScoreVal;
-    public static Label[][] labelGrid = new Label[4][4];
-    private static Game game;
-    private static StackPane scoreStack = new StackPane();
+    private final static Duration ANIMATION_TIME = Duration.seconds(0.10);
     private final EventHandler<KeyEvent> keyEventHandler = keyEvent -> {
         switch (keyEvent.getCode()) {
             case UP, W, KP_UP:
@@ -42,22 +38,25 @@ public class Controller extends Application implements PropertyChangeListener {
                 game.moveHorizontal(0, "left");
                 break;
         }
-        System.out.println();
     };
+    private static StackPane scoreStack = new StackPane();
+    public static Label[][] labelGrid = new Label[4][4];
+    private static Label scoreVal, bestScoreVal;
     private static GridPane grid;
-    private Scene scene;
+    private static Game game;
     private StackPane windowStack;
+    private Scene scene;
     @Override
     public void start(Stage stage) throws IOException {
         // title, directions, how-to
-        VBox info = makeInfo();
+        VBox info = createGameInfo();
         // score and best score
-        GridPane scoreAndBestScore = makeScoreGrid();
+        GridPane scoreAndBestScore = createScoreGrid();
         // configuring the top section
-        HBox top = makeTop(scoreAndBestScore, info);
+        HBox top = createTop(scoreAndBestScore, info);
         // main game grid
         windowStack = new StackPane();
-        grid = makeGrid();
+        grid = createGrid();
         windowStack.getChildren().addAll(grid, new Label());
         // adding all sections to the main vbox
         VBox main = new VBox();
@@ -75,18 +74,16 @@ public class Controller extends Application implements PropertyChangeListener {
         stage.show();
         game.newGame();
     }
-
     public static void main(String[] args) {
         Application.launch();
     }
-
     @Override
     public void init() throws Exception {
         game = new Game();
         game.addPropertyChangeListener(this);
     }
-
-    public GridPane makeGrid() {
+    @NotNull
+    public GridPane createGrid() {
         GridPane grid = new GridPane();
         grid.setMinSize(GRID_SIZE, GRID_SIZE);
         grid.setMaxSize(GRID_SIZE, GRID_SIZE);
@@ -104,7 +101,8 @@ public class Controller extends Application implements PropertyChangeListener {
         }
         return grid;
     }
-    public static VBox makeInfo() {
+    @NotNull
+    public static VBox createGameInfo() {
         VBox info = new VBox();
         Label _2048 = new Label("2048");
         _2048.getStyleClass().addAll("game-title", "bold", "directions-text");
@@ -121,7 +119,8 @@ public class Controller extends Application implements PropertyChangeListener {
         info.getChildren().addAll(_2048, dir, howTo, blank);
         return info;
     }
-    public static GridPane makeScoreGrid() {
+    @NotNull
+    public static GridPane createScoreGrid() {
         GridPane grid = new GridPane();
         grid.setMaxSize(SCORE_TILE_SIZE * 1.5, SCORE_TILE_SIZE * 0.75);
         grid.setMinSize(SCORE_TILE_SIZE * 1.25, SCORE_TILE_SIZE * 0.75);
@@ -152,7 +151,8 @@ public class Controller extends Application implements PropertyChangeListener {
         grid.setAlignment(Pos.CENTER_RIGHT);
         return grid;
     }
-    public static HBox makeTop(GridPane scoreAndBestScore, VBox info) {
+    @NotNull
+    public static HBox createTop(GridPane scoreAndBestScore, VBox info) {
         Label blank = new Label();
         blank.setMinSize(105, 25);
         Label blank2 = new Label();
@@ -170,7 +170,8 @@ public class Controller extends Application implements PropertyChangeListener {
         top.setAlignment(Pos.TOP_LEFT);
         return top;
     }
-    public StackPane makeWinScreen(){
+    @NotNull
+    public StackPane createWinScreen(){
         // creating the stack pane and the background label
         StackPane stack = new StackPane();
         Label background = new Label();
@@ -205,7 +206,8 @@ public class Controller extends Application implements PropertyChangeListener {
         stack.setOpacity(0);
         return stack;
     }
-    public StackPane makeGameOverScreen(){
+    @NotNull
+    public StackPane createGameOverScreen(){
         // creating the background label
         Label background = new Label();
         background.setMinSize(GRID_SIZE, GRID_SIZE);
@@ -236,7 +238,7 @@ public class Controller extends Application implements PropertyChangeListener {
         updateScore();
         // creating a ParallelTransition that will hold all the tile movement animations
         ParallelTransition tileAnimations = new ParallelTransition();
-        if (direction != null) {
+        if (direction != null && !game.getGameWon()) {
             if (direction.equals("up")){
                 // looping through each tile in the board
                 for (int i = 0; i < Game.BOARD_SIZE; i++){
@@ -244,8 +246,22 @@ public class Controller extends Application implements PropertyChangeListener {
                         int spacesToMove = 0;
                         // if the tile has a number, see if it needs to be moved up
                         if (!labelGrid[j][i].getText().isEmpty()){
-                            // if there is a collision, the tile can move
-                            if (i > 0 && !labelGrid[j][i].getText().isEmpty() && labelGrid[j][i].getText().equals(labelGrid[j][i-1].getText()))
+                            // if there is a collision, the tile can move up again
+                            if (i == 1 && !labelGrid[j][i].getText().isEmpty() &&
+                                    labelGrid[j][i].getText().equals(labelGrid[j][i - 1].getText()))
+                                spacesToMove++;
+                            if (i == 2 && !labelGrid[j][i].getText().isEmpty() &&
+                                    ((labelGrid[j][i].getText().equals(labelGrid[j][i - 2].getText()) &&
+                                            labelGrid[j][i - 1].getText().isEmpty()) ||
+                                            labelGrid[j][i].getText().equals(labelGrid[j][i - 1].getText())))
+                                spacesToMove++;
+                            if (i == 3 && !labelGrid[j][i].getText().isEmpty() &&
+                                    ((labelGrid[j][i].getText().equals(labelGrid[j][i - 3].getText()) &&
+                                            labelGrid[j][i - 2].getText().isEmpty() &&
+                                            labelGrid[j][i - 1].getText().isEmpty()) ||
+                                            (labelGrid[j][i].getText().equals(labelGrid[j][i - 2].getText()) &&
+                                                    labelGrid[j][i - 1].getText().isEmpty()) ||
+                                            labelGrid[j][i].getText().equals(labelGrid[j][i - 1].getText())))
                                 spacesToMove++;
                             // checking every tile above the current tile
                             for (int k = 0; k < i; k++){
@@ -254,59 +270,134 @@ public class Controller extends Application implements PropertyChangeListener {
                                     spacesToMove++;
                             }
                             // if the tile can move up, animate the upwards motion
-                            if (spacesToMove != 0) {
+                            if (spacesToMove != 0)
                                 tileAnimations.getChildren().addAll(createTileMoveAnimation(j, i, j, i - spacesToMove));
-                            }
-                            System.out.println("Tile @ (" + j + ", " + i + ") moves up " + spacesToMove);
                             // reset the spacesToMove counter
                             spacesToMove = 0;
                         }
                     }
                 }
-                System.out.println();
             } else if (direction.equals("down")){
                 // looping through each tile in the board
                 for (int i = 0; i < Game.BOARD_SIZE; i++){
                     for (int j = 0; j < Game.BOARD_SIZE; j++){
                         int spacesToMove = 0;
-                        // if the tile has a number, see if it needs to be moved up
+                        // if the tile has a number, see if it needs to be moved down
                         if (!labelGrid[j][i].getText().isEmpty()){
-                            // if there is a collision, the tile can move
-                            if (i < 3 && !labelGrid[j][i].getText().isEmpty() && labelGrid[j][i].getText().equals(labelGrid[j][i + 1].getText()))
+                            // if there is a collision, the tile can move down again
+                            if (i == 2 && !labelGrid[j][i].getText().isEmpty() &&
+                                    labelGrid[j][i].getText().equals(labelGrid[j][i + 1].getText()))
                                 spacesToMove++;
-                            // checking every tile above the current tile
+                            if (i == 1 && !labelGrid[j][i].getText().isEmpty() &&
+                                    (labelGrid[j][i].getText().equals(labelGrid[j][i + 1].getText()) ||
+                                            (labelGrid[j][i].getText().equals(labelGrid[j][i + 2].getText()) &&
+                                                    labelGrid[j][i + 1].getText().isEmpty())))
+                                spacesToMove++;
+                            if (i == 0 && !labelGrid[j][i].getText().isEmpty() &&
+                                    (labelGrid[j][i].getText().equals(labelGrid[j][i + 1].getText()) ||
+                                            (labelGrid[j][i].getText().equals(labelGrid[j][i + 2].getText()) &&
+                                                    labelGrid[j][i + 1].getText().isEmpty()) ||
+                                            (labelGrid[j][i].getText().equals(labelGrid[j][i + 3].getText()) &&
+                                                    labelGrid[j][i + 2].getText().isEmpty() &&
+                                                    labelGrid[j][i + 1].getText().isEmpty())))
+                                spacesToMove++;
+                            // checking every tile below the current tile
                             for (int k = 3; k > i; k--){
-                                // if there is any empty space, the tile can move up
+                                // if there is any empty space, the tile can move down
                                 if (labelGrid[j][k].getText().isEmpty())
                                     spacesToMove++;
                             }
-                            // if the tile can move up, animate the upwards motion
-                            if (spacesToMove != 0) {
+                            // if the tile can move down, animate the downwards motion
+                            if (spacesToMove != 0)
                                 tileAnimations.getChildren().addAll(createTileMoveAnimation(j, i, j, i + spacesToMove));
-                            }
-                            System.out.println("Tile @ (" + j + ", " + i + ") moves down " + spacesToMove);
                             // reset the spacesToMove counter
                             spacesToMove = 0;
                         }
                     }
                 }
-                System.out.println();
             } else if (direction.equals("right")){
+                // looping through each tile in the board
                 for (int i = 0; i < Game.BOARD_SIZE; i++){
                     for (int j = 0; j < Game.BOARD_SIZE; j++){
                         int spacesToMove = 0;
+                        // if the tile has a number, see if it needs to be moved right
+                        if (!labelGrid[j][i].getText().isEmpty()){
+                            // if there is a collision, the tile can move right again
+                            if (j == 2 && !labelGrid[j][i].getText().isEmpty() &&
+                                    (labelGrid[j][i].getText().equals(labelGrid[j + 1][i].getText())))
+                                spacesToMove++;
+                            if (j == 1 && !labelGrid[j][i].getText().isEmpty() &&
+                                    ((labelGrid[j][i].getText().equals(labelGrid[j + 2][i].getText()) &&
+                                            labelGrid[j + 1][i].getText().isEmpty()) ||
+                                            labelGrid[j][i].getText().equals(labelGrid[j + 1][i].getText())))
+                                spacesToMove++;
+                            if (j == 0 && !labelGrid[j][i].getText().isEmpty() &&
+                                    ((labelGrid[j][i].getText().equals(labelGrid[j + 3][i].getText()) &&
+                                            labelGrid[j + 2][i].getText().isEmpty() &&
+                                            labelGrid[j + 1][i].getText().isEmpty()) ||
+                                            (labelGrid[j][i].getText().equals(labelGrid[j + 2][i].getText()) &&
+                                                    labelGrid[j + 1][i].getText().isEmpty()) ||
+                                            labelGrid[j][i].getText().equals(labelGrid[j + 1][i].getText())))
+                                spacesToMove++;
+                            // checking every tile right of the current tile
+                            for (int k = 3; k > j; k--){
+                                // if there is any empty space, the tile can move right
+                                if (labelGrid[k][i].getText().isEmpty())
+                                    spacesToMove++;
+                            }
+                            // if the tile can move right, animate the right motion
+                            if (spacesToMove != 0)
+                                tileAnimations.getChildren().addAll(createTileMoveAnimation(j, i, j + spacesToMove, i));
+                            // reset the spacesToMove counter
+                            spacesToMove = 0;
+                        }
                     }
                 }
-                System.out.println();
             } else if (direction.equals("left")){
-
+                // looping through each tile in the board
+                for (int i = 0; i < Game.BOARD_SIZE; i++){
+                    for (int j = 0; j < Game.BOARD_SIZE; j++){
+                        int spacesToMove = 0;
+                        // if the tile has a number, see if it needs to be moved left
+                        if (!labelGrid[j][i].getText().isEmpty()){
+                            // if there is a collision, the tile can move left again
+                            if (j == 1 && !labelGrid[j][i].getText().isEmpty() &&
+                                    (labelGrid[j][i].getText().equals(labelGrid[j - 1][i].getText())))
+                                spacesToMove++;
+                            if (j == 2 && !labelGrid[j][i].getText().isEmpty() &&
+                                    ((labelGrid[j][i].getText().equals(labelGrid[j - 2][i].getText()) &&
+                                            labelGrid[j - 1][i].getText().isEmpty()) ||
+                                            labelGrid[j][i].getText().equals(labelGrid[j - 1][i].getText())))
+                                spacesToMove++;
+                            if (j == 3 && !labelGrid[j][i].getText().isEmpty() &&
+                                    ((labelGrid[j][i].getText().equals(labelGrid[j - 3][i].getText()) &&
+                                            labelGrid[j - 2][i].getText().isEmpty() &&
+                                            labelGrid[j - 1][i].getText().isEmpty()) ||
+                                            (labelGrid[j][i].getText().equals(labelGrid[j - 2][i].getText()) &&
+                                                    labelGrid[j - 1][i].getText().isEmpty()) ||
+                                            labelGrid[j][i].getText().equals(labelGrid[j - 1][i].getText())))
+                                spacesToMove++;
+                            // checking every tile left of the current tile
+                            for (int k = 0; k < j; k++){
+                                // if there is any empty space, the tile can move left
+                                if (labelGrid[k][i].getText().isEmpty())
+                                    spacesToMove++;
+                            }
+                            // if the tile can move left, animate the left motion
+                            if (spacesToMove != 0)
+                                tileAnimations.getChildren().addAll(createTileMoveAnimation(j, i, j - spacesToMove, i));
+                            // reset the spacesToMove counter
+                            spacesToMove = 0;
+                        }
+                    }
+                }
             }
         }
+        // creating a PauseTransition that pauses GUI updating until the tile's moving animation completes
         PauseTransition pause = getPauseTransition(quick);
         tileAnimations.play();
         pause.play();
     }
-
     @NotNull
     private PauseTransition getPauseTransition(boolean quick) {
         Duration time;
@@ -337,7 +428,6 @@ public class Controller extends Application implements PropertyChangeListener {
         });
         return pause;
     }
-
     private void updateScore() {
         scoreVal.setText(String.valueOf(game.getNewScore()));
         bestScoreVal.setText(String.valueOf(game.getBestScore()));
@@ -371,10 +461,10 @@ public class Controller extends Application implements PropertyChangeListener {
         pause.play();
     }
     private void playTileAppearAnimation(Label label){
-        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.3), label);
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.2), label);
         fadeTransition.setFromValue(0);
         fadeTransition.setToValue(1);
-        ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.3), label);
+        ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.2), label);
         scaleTransition.setFromX(0);
         scaleTransition.setFromY(0);
         scaleTransition.setToX(1);
@@ -382,33 +472,30 @@ public class Controller extends Application implements PropertyChangeListener {
         ParallelTransition parallelTransition = new ParallelTransition(fadeTransition, scaleTransition);
         parallelTransition.play();
     }
-    public ParallelTransition createTileMoveAnimation(int startX, int startY, int endX, int endY){
-        System.out.println("Animation playing on tile @ (" + startX + ", " + startY + ") moving to (" + endX + ", " + endY + ")");
+    @NotNull
+    public TranslateTransition createTileMoveAnimation(int startX, int startY, int endX, int endY){
+        Label label = labelGrid[startX][startY];
         // disable keyboard input until animation has played
         scene.setOnKeyPressed(null);
         // calculating the distance to move the tile and bringing the label to the front
-        Label label = labelGrid[startX][startY];
         label.toFront();
         double translateX = (endX - startX) * TILE_SIZE;
         double translateY = (endY - startY) * TILE_SIZE;
         // creating the TranslateTransition that moves the tile
+        return getTranslateTransition(label, translateX, translateY);
+    }
+    @NotNull
+    private TranslateTransition getTranslateTransition(Label label, double translateX, double translateY) {
         TranslateTransition translate = new TranslateTransition(ANIMATION_TIME, label);
+        // assigning values to various translation properties
         translate.setByX(translateX);
         translate.setByY(translateY);
-        // creating the FadeTransition that fades the tile out
-//        FadeTransition fade = new FadeTransition(ANIMATION_TIME, label);
-//        fade.setFromValue(1.0);
-//        fade.setToValue(0.0);
-//        fade.setInterpolator(Interpolator.EASE_IN);
-        // creating the parallel transition which contains the translate and fade animations
-        ParallelTransition parallel = new ParallelTransition(translate);
-        parallel.setOnFinished(e -> {
+        translate.setOnFinished(e -> {
             label.setTranslateX(0);
             label.setTranslateY(0);
-            label.setOpacity(1.0); // Reset opacity if needed
             scene.setOnKeyPressed(keyEventHandler);
         });
-        return parallel;
+        return translate;
     }
     @Override
     public void propertyChange(PropertyChangeEvent event) {
@@ -463,7 +550,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "won game":
                 scene.setOnKeyPressed(null);
-                windowStack.getChildren().set(1, makeWinScreen());
+                windowStack.getChildren().set(1, createWinScreen());
                 playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));
                 break;
             case "continue":
@@ -472,7 +559,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case "game over":
                 scene.setOnKeyPressed(null);
-                windowStack.getChildren().set(1, makeGameOverScreen());
+                windowStack.getChildren().set(1, createGameOverScreen());
                 playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));
                 break;
         }

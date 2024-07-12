@@ -7,8 +7,12 @@ import java.util.List;
 import java.util.Random;
 
 public class Game {
-    /* !!! ONLY CHANGE DEBUG IF YOU KNOW WHAT YOU ARE DOING !!! */
-    private boolean debug = true;
+    /**
+     *  ONLY CHANGE DEBUG IF YOU KNOW WHAT YOU ARE DOING
+     *  See generateTile() method for options
+     */
+    private boolean debug = false;
+
     public final static int BOARD_SIZE = 4, WINNING_SCORE = 2048;
     private PropertyChangeSupport support;
     private Tile[][] board;
@@ -75,17 +79,21 @@ public class Game {
         this.support.firePropertyChange("newGame", null, rand.nextInt(10));
     }
     public void generateTile(boolean debug){
+        /* enabling debug allows for the customization of where tiles spawn, their value, and their moveCount
+         * it also prints the board's values to the console
+         */
         if(debug){
-            int pos = 0, num = 2;
-            this.board[pos][pos].setValue(num);
+            int pos = 1, num = 2;
+            this.board[pos-1][pos].setValue(num*16);
+            this.board[pos-1][pos].setMoveGenerated(this.moveCount);
+            this.board[pos][pos].setValue(num*4);
             this.board[pos][pos].setMoveGenerated(this.moveCount);
             this.board[pos+1][pos].setValue(num);
             this.board[pos+1][pos].setMoveGenerated(this.moveCount);
-            this.board[pos+2][pos].setValue(num);
+            this.board[pos+2][pos].setValue(num*4);
             this.board[pos+2][pos].setMoveGenerated(this.moveCount);
-            this.board[pos+3][pos].setValue(num);
-            this.board[pos+3][pos].setMoveGenerated(this.moveCount);
-        } else {
+            System.out.println(this);
+        } else { // default random tile generation
             if ((!gameWon || continued) && !(gameOver)) {
                 int t1 = ((rand.nextInt(1, 5) % 4) == 0) ? 2 : 4, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
                 while (!board[r1][c1].isEmpty()) {
@@ -96,6 +104,7 @@ public class Game {
                 this.board[r1][c1].setMoveGenerated(this.moveCount);
             }
         }
+        // check if the game is over after a tile generates
         checkForGameOver();
     }
     public void generateTileDecision(boolean sameBoard, int iteration, String direction){
@@ -321,7 +330,10 @@ public class Game {
         StringBuilder string = new StringBuilder();
         for(int i = 0; i < BOARD_SIZE; i++){
             for(int j = 0; j < BOARD_SIZE; j++){
-                string.append(board[i][j].getValue()).append(" ");
+                if (board[i][j].getValue() >= 1024)
+                    string.append(board[i][j].getValue()).append("\t");
+                else
+                    string.append(board[i][j].getValue()).append("\t\t");
             }
             string.append("\n");
         }

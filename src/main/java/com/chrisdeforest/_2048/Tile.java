@@ -1,19 +1,11 @@
 package com.chrisdeforest._2048;
 
 public class Tile {
-    private static final String COLOR_0 = "rgb(204, 192, 179)";
-    private static final String COLOR_2 = "rgb(238, 228, 218)";
-    private static final String COLOR_4 = "rgb(237, 224, 200)";
-    private static final String COLOR_8 = "rgb(242, 177, 121)";
-    private static final String COLOR_16 = "rgb(245, 149, 99)";
-    private static final String COLOR_32 = "rgb(246, 124, 95)";
-    private static final String COLOR_64 = "rgb(246, 94, 59)";
-    private static final String COLOR_128 = "rgb(237, 207, 114)";
-    private static final String COLOR_256 = "rgb(237, 204, 97)";
-    private static final String COLOR_512 = "rgb(237, 200, 80)";
-    private static final String COLOR_1024 = "rgb(237, 197, 63)";
-    private static final String COLOR_2048 = "rgb(237, 194, 46)";
-    private static final String COLOR_DEFAULT = "rgb(0, 0, 0)";
+    private static final String COLOR_0 = "rgb(204, 192, 179)", COLOR_2 = "rgb(238, 228, 218)",
+            COLOR_4 = "rgb(237, 224, 200)", COLOR_8 = "rgb(242, 177, 121)", COLOR_16 = "rgb(245, 149, 99)",
+            COLOR_32 = "rgb(246, 124, 95)", COLOR_64 = "rgb(246, 94, 59)", COLOR_128 = "rgb(237, 207, 114)",
+            COLOR_256 = "rgb(237, 204, 97)", COLOR_512 = "rgb(237, 200, 80)", COLOR_1024 = "rgb(237, 197, 63)",
+            COLOR_2048 = "rgb(237, 194, 46)", COLOR_DEFAULT = "rgb(0, 0, 0)";
     private int value, moveGenerated;
     private boolean animationPlayed;
     public Tile() {
