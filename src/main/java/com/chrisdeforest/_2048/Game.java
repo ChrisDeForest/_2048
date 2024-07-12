@@ -14,9 +14,9 @@ public class Game {
     private boolean debug = false;
 
     public final static int BOARD_SIZE = 4, WINNING_SCORE = 2048;
-    private PropertyChangeSupport support;
-    private Tile[][] board;
-    private Random rand;
+    private final PropertyChangeSupport support;
+    private final Tile[][] board;
+    private final Random rand;
     private boolean gameWon, continued, gameOver, sameBoard;
     private int oldScore, newScore, bestScore, moveCount;
     public Game(){
@@ -94,8 +94,8 @@ public class Game {
             this.board[pos+2][pos].setMoveGenerated(this.moveCount);
             System.out.println(this);
         } else { // default random tile generation
-            if ((!gameWon || continued) && !(gameOver)) {
-                int t1 = ((rand.nextInt(1, 5) % 4) == 0) ? 2 : 4, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
+            if ((!gameWon || continued) && !gameOver) {
+                int t1 = ((rand.nextInt(1, 5) % 4) == 0) ? 4 : 2, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
                 while (!board[r1][c1].isEmpty()) {
                     r1 = rand.nextInt(4);
                     c1 = rand.nextInt(4);
@@ -117,9 +117,9 @@ public class Game {
             this.support.firePropertyChange(direction, -10, 0);
         }
     }
-    public void moveVertical(int iteration, String direction){
+    public void moveVertical(int iteration, String direction) {
         sameBoard = true;
-        for(int i = 0; i < BOARD_SIZE; i++) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
             Tile[] col = {board[0][i], board[1][i], board[2][i], board[3][i]};
             List<Tile> newCol = new LinkedList<>();
             for (Tile t : col) {
@@ -128,21 +128,21 @@ public class Game {
             }
             // adds back the missing values once values have been moved around
             int missingTiles = 4 - newCol.size();
-            for(int j = 0; j < missingTiles; j++){
-                if(direction.equals("up"))
+            for (int j = 0; j < missingTiles; j++) {
+                if (direction.equals("up"))
                     newCol.add(new Tile());
                 else {
                     newCol.addFirst(new Tile());
                 }
             }
             // takes care of tile merging if tiles of the same value are moved up
-            if(iteration == 0)
+            if (iteration == 0)
                 newCol = condense(newCol, direction);
             // updates the values in the Tile[][] board's current row to the new row values
-            for(int j = 0; j < BOARD_SIZE; j++)
+            for (int j = 0; j < BOARD_SIZE; j++)
                 this.board[j][i] = newCol.get(j);
             // checking to see whether a tile should be generated or not
-            for(int j = 0; j < BOARD_SIZE; j++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
                 if (!(((col[j].getValue() == newCol.get(j).getValue())))) {
                     sameBoard = false;
                     break;
@@ -262,29 +262,11 @@ public class Game {
         this.continued = true;
         this.support.firePropertyChange("continue", null, 0);
     }
-    public int getValue(int r, int c){
-        return this.board[r][c].getValue();
-    }
-    public void setValue(int r, int c, int v){
-        this.board[r][c].setValue(v);
-    }
     public Tile[][] getBoard(){
         return this.board;
     }
-    public void setBoard(Tile[][] b){
-        this.board = b;
-    }
     public boolean getGameWon(){
         return this.gameWon;
-    }
-    public void setGameWon(boolean gw){
-        this.gameWon = gw;
-    }
-    public boolean getContinued(){
-        return this.continued;
-    }
-    public void setContinued(boolean c){
-        this.continued = c;
     }
     public int getOldScore(){
         return this.oldScore;
@@ -295,9 +277,6 @@ public class Game {
     public int getNewScore(){
         return this.newScore;
     }
-    public void setNewScore(int s){
-        this.newScore = s;
-    }
     public int getBestScore(){
         return this.bestScore;
     }
@@ -307,23 +286,14 @@ public class Game {
     public boolean getSameBoard(){
         return this.sameBoard;
     }
-    public void setSameBoard(boolean sb){
-        this.sameBoard = sb;
-    }
     public int getMoveCount(){
         return this.moveCount;
-    }
-    public void setMoveCount(int mc){
-        this.moveCount = mc;
     }
     public void incrementMoveCount(){
         this.moveCount++;
     }
     public boolean getDebug(){
         return this.debug;
-    }
-    public void setDebug(boolean dbg){
-        this.debug = dbg;
     }
     @Override
     public String toString(){
@@ -353,8 +323,5 @@ public class Game {
     }
     public void addPropertyChangeListener(PropertyChangeListener listener){
         this.support.addPropertyChangeListener(listener);
-    }
-    public void removePropertyChangeListener(PropertyChangeListener listener){
-        this.support.removePropertyChangeListener(listener);
     }
 }
