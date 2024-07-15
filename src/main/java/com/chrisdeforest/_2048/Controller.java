@@ -4,10 +4,12 @@ import javafx.animation.*;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -17,11 +19,10 @@ import org.jetbrains.annotations.NotNull;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-// TODO add scrollable pane for information below;
-
 public class Controller extends Application implements PropertyChangeListener {
-    private final static int SCORE_TILE_SIZE = 100, TILE_SIZE = 120, GRID_SIZE = 500;
-    private final static Duration ANIMATION_TIME = Duration.seconds(0.10);
+    private final static int SCORE_TILE_SIZE = 100, TILE_SIZE = 120, GRID_SIZE = 500, SCROLLING_DISTANCE = 2;
+    private final static Duration ANIMATION_TIME = Duration.seconds(0.10),
+            SCROLLING_ANIMATION_TIME = Duration.seconds(2);
     private final EventHandler<KeyEvent> keyEventHandler = keyEvent -> {
         switch (keyEvent.getCode()) {
             case UP, W, KP_UP:
@@ -40,6 +41,7 @@ public class Controller extends Application implements PropertyChangeListener {
     };
     private static final StackPane scoreStack = new StackPane();
     public static Label[][] labelGrid = new Label[4][4];
+    private final ScrollPane scroll = new ScrollPane();
     private static Label scoreVal, bestScoreVal;
     private static Game game;
     private StackPane windowStack;
@@ -57,18 +59,29 @@ public class Controller extends Application implements PropertyChangeListener {
         GridPane grid = createGrid();
         windowStack.getChildren().addAll(grid, new Label());
         // adding all sections to the main vbox
-        VBox main = new VBox();
-        main.getChildren().addAll(top, windowStack);
-        main.setAlignment(Pos.CENTER);
+        VBox topAndGrid = new VBox();
+        topAndGrid.getChildren().addAll(top, windowStack);
+        topAndGrid.setAlignment(Pos.CENTER);
+        // creating the how-to-play section
+        VBox howToPlay = createHowToPlay();
+        // adding the sections together in a vbox
+        VBox content = new VBox();
+        content.getChildren().addAll(topAndGrid, howToPlay);
+        // adding the main and how-to-play sections to a scrollable pane
+        scroll.setFitToWidth(true);
+        scroll.setFitToHeight(true);
+        scroll.setPannable(true);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setContent(content);
         // scene and stage settings
-        scene = new Scene(main);
+        scene = new Scene(scroll);
         scene.getStylesheets().add("file:src/main/resources/styles.css");
         scene.setOnKeyPressed(keyEventHandler);
         stage.setScene(scene);
         stage.setHeight(800);
         stage.setWidth(550);
         stage.setResizable(false);
-        stage.setTitle("2048");
+        stage.setTitle("2048 FX");
         stage.show();
         game.newGame();
     }
@@ -81,7 +94,7 @@ public class Controller extends Application implements PropertyChangeListener {
         game.addPropertyChangeListener(this);
     }
     @NotNull
-    public GridPane createGrid() {
+    private GridPane createGrid() {
         GridPane grid = new GridPane();
         grid.setMinSize(GRID_SIZE, GRID_SIZE);
         grid.setMaxSize(GRID_SIZE, GRID_SIZE);
@@ -100,29 +113,36 @@ public class Controller extends Application implements PropertyChangeListener {
         return grid;
     }
     @NotNull
-    public static VBox createGameInfo() {
+    private VBox createGameInfo() {
         VBox info = new VBox();
         Label _2048 = new Label("2048");
-        _2048.getStyleClass().addAll("game-title", "bold", "directions-text");
+        VBox.setMargin(_2048, new Insets(25, 0, 0, 0));
+        _2048.getStyleClass().addAll("game-title", "bold", "game-text");
         Label directions = new Label("Join the tiles, get to ");
-        directions.getStyleClass().addAll("directions-padding", "directions-text");
+        directions.getStyleClass().addAll("directions-padding", "game-text");
         Label directions1 = new Label("2048!");
-        directions1.getStyleClass().addAll("bold", "directions-text");
+        directions1.getStyleClass().addAll("bold", "game-text");
         HBox dir = new HBox();
         dir.getChildren().addAll(directions, directions1);
         Label howTo = new Label("How to play -->\n");
-        howTo.getStyleClass().addAll("directions-padding", "ul", "bold", "directions-text");
+        howTo.getStyleClass().addAll("directions-padding", "underline", "bold", "game-text");
+        howTo.setOnMouseClicked(event ->{
+            Timeline timeLine = new Timeline();
+            KeyFrame keyFrame = new KeyFrame(SCROLLING_ANIMATION_TIME,
+                    new javafx.animation.KeyValue(scroll.vvalueProperty(), SCROLLING_DISTANCE, Interpolator.EASE_IN));
+            timeLine.getKeyFrames().add(keyFrame);
+            timeLine.play();
+        });
         Label blank = new Label();
         blank.setMinSize(50, 35);
         info.getChildren().addAll(_2048, dir, howTo, blank);
         return info;
     }
     @NotNull
-    public static GridPane createScoreGrid() {
+    private GridPane createScoreGrid() {
         GridPane grid = new GridPane();
         grid.setMaxSize(SCORE_TILE_SIZE * 1.5, SCORE_TILE_SIZE * 0.75);
         grid.setMinSize(SCORE_TILE_SIZE * 1.25, SCORE_TILE_SIZE * 0.75);
-        grid.getStyleClass().addAll("score-grid");
         VBox left = new VBox();
         left.setMinSize(100, 60);
         left.setMaxSize(125, 60);
@@ -150,11 +170,12 @@ public class Controller extends Application implements PropertyChangeListener {
         return grid;
     }
     @NotNull
-    public static HBox createTop(GridPane scoreAndBestScore, VBox info) {
+    private HBox createTop(GridPane scoreAndBestScore, VBox info) {
         Label blank = new Label();
         blank.setMinSize(105, 25);
         Label blank2 = new Label();
         blank2.setMinSize(50, 40);
+        VBox.setMargin(blank, new Insets(45, 0, 0, 0));
         Button newGame = new Button("New Game");
         EventHandler<ActionEvent> newGameAction = event -> game.newGame();
         newGame.setOnAction(newGameAction);
@@ -163,13 +184,14 @@ public class Controller extends Application implements PropertyChangeListener {
         rightSide.setMinSize(175, 125);
         rightSide.setAlignment(Pos.TOP_RIGHT);
         rightSide.getChildren().addAll(scoreAndBestScore, blank2, newGame);
+        VBox.setMargin(scoreAndBestScore, new Insets(25, 0, 0, 0));
         HBox top = new HBox();
         top.getChildren().addAll(info, blank, rightSide);
         top.setAlignment(Pos.TOP_LEFT);
         return top;
     }
     @NotNull
-    public StackPane createWinScreen(){
+    private StackPane createWinScreen(){
         // creating the stack pane and the background label
         StackPane stack = new StackPane();
         Label background = new Label();
@@ -205,7 +227,7 @@ public class Controller extends Application implements PropertyChangeListener {
         return stack;
     }
     @NotNull
-    public StackPane createGameOverScreen(){
+    private StackPane createGameOverScreen(){
         // creating the background label
         Label background = new Label();
         background.setMinSize(GRID_SIZE, GRID_SIZE);
@@ -230,6 +252,48 @@ public class Controller extends Application implements PropertyChangeListener {
         stack.getChildren().addAll(background, vbox);
         stack.setOpacity(0);
         return stack;
+    }
+    private VBox createHowToPlay(){
+        VBox howToPlay = new VBox();
+        howToPlay.setAlignment(Pos.CENTER);
+        howToPlay.getStyleClass().addAll();
+        HBox line1 = new HBox();
+        line1.setAlignment(Pos.CENTER);
+        Label line1_1 = new Label("HOW TO PLAY: "), line1_2 = new Label("Use "),
+                line1_3 = new Label("WASD "), line1_4 = new Label("or "),
+                line1_5 = new Label("ARROW KEYS "), line1_6 = new Label("to move the tiles.");
+        line1_1.getStyleClass().addAll("bold");
+        line1_3.getStyleClass().addAll("bold");
+        line1_5.getStyleClass().addAll("bold");
+        line1.getChildren().addAll(line1_1, line1_2, line1_3, line1_4, line1_5, line1_6);
+        HBox line2 = new HBox();
+        line2.setAlignment(Pos.CENTER);
+        Label line2_1 = new Label("Tiles with the same number "), line2_2 = new Label("merge into one "),
+                line2_3 = new Label("when they touch.");
+        line2_2.getStyleClass().addAll("bold");
+        line2.getChildren().addAll(line2_1, line2_2, line2_3);
+        HBox line3 = new HBox();
+        line3.setAlignment(Pos.CENTER);
+        Label line3_1 = new Label("Add them up to reach "), line3_2 = new Label("2048!");
+        line3_2.getStyleClass().addAll("bold");
+        line3.getChildren().addAll(line3_1, line3_2);
+        HBox line4 = new HBox();
+        line4.setAlignment(Pos.CENTER);
+        Label line4_1 = new Label("Return to top");
+        line4_1.setOnMouseClicked(event -> {
+            Timeline timeLine = new Timeline();
+            KeyFrame keyFrame = new KeyFrame(SCROLLING_ANIMATION_TIME,
+                    new javafx.animation.KeyValue(scroll.vvalueProperty(), -1 * SCROLLING_DISTANCE, Interpolator.EASE_IN));
+            timeLine.getKeyFrames().add(keyFrame);
+            timeLine.play();
+        });
+        line4_1.getStyleClass().addAll("underline", "bold");
+        line4.getChildren().addAll(line4_1);
+        VBox.setMargin(line1, new Insets(35, 0, 0, 0));
+        VBox.setMargin(line3, new Insets( 0, 0, 35, 0));
+        VBox.setMargin(line4, new Insets(0, 0, 35, 0));
+        howToPlay.getChildren().addAll(line1, line2, line3, line4);
+        return howToPlay;
     }
     private void updateTiles(boolean quick, String direction) {
         // updating the game's score and playing the score animation

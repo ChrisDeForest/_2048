@@ -62,6 +62,7 @@ public class Game {
             for(int j = 0; j < BOARD_SIZE; j++){
                 board[i][j].setValue(0);
                 board[i][j].setMoveGenerated(-1);
+                board[i][j].setAnimationPlayed(false);
             }
         }
     }

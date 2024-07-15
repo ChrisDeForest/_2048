@@ -1,3 +1,9 @@
+/* Used for determining GUI element placement (debugging)
+*{
+    -fx-border-color: red;
+    -fx-border-radius: 1;
+}
+*/
 .root{
     -fx-font-size: 12pt;
     -fx-font-family: "Clear Sans", "Helvetica Neue", "Arial", "sans-serif";
@@ -7,6 +13,9 @@
     -fx-background-color: rgb(187, 174, 160);
     -fx-background-radius: 5;
     -fx-alignment: center;
+}
+.game-text {
+    -fx-text-fill: rgb(118, 110, 101);
 }
 .game-title{
     -fx-font-size: 57pt;
@@ -51,17 +60,14 @@
 .animated{
     -fx-text-fill: rgba(118, 110, 101, 0.60);
 }
-.directions-text{
-    -fx-text-fill: rgb(118, 110, 101);
-}
 .directions-padding{
     -fx-padding: 0 0 0 43;
 }
-.ul{
-    -fx-underline: true;
-}
 .bold{
     -fx-font-weight: bold;
+}
+.underline{
+    -fx-underline: true;
 }
 .margin {
     -fx-padding: 7px;
@@ -71,4 +77,11 @@
 .border{
     -fx-border-width: 1px;
     -fx-border-color: red;
+}
+.scroll-pane {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
 }
