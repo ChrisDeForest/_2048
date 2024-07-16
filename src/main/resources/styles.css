@@ -1,33 +1,55 @@
-/* Used for determining GUI element placement (debugging)
+/* ========== Global Styles ========== */
+
+/* Debugging: Uncomment this section to see the borders of all elements
 *{
     -fx-border-color: red;
     -fx-border-radius: 1;
 }
 */
+
+/* Root container styling */
 .root{
     -fx-font-size: 12pt;
     -fx-font-family: "Clear Sans", "Helvetica Neue", "Arial", "sans-serif";
     -fx-background: rgb(249, 248, 239);
 }
+
+/* ========== Grid Styles ========== */
+
+/* Grid container styling */
 .grid{
     -fx-background-color: rgb(187, 174, 160);
     -fx-background-radius: 5;
     -fx-alignment: center;
 }
+
+/* ========== Text Styles ========== */
+
+/* General text styling for game */
 .game-text {
     -fx-text-fill: rgb(118, 110, 101);
 }
+
+/* Title text styling */
 .game-title{
     -fx-font-size: 57pt;
     -fx-content-display: left;
     -fx-padding: 0 0 0 41;
 }
+
+/* ========== Button Styles ========== */
+
+/* Button styling for game */
 .game-button{
     -fx-background-color: rgb(144, 122, 102);
     -fx-text-fill: rgb(250, 246, 241);
     -fx-text-alignment: center;
     -fx-font-size: 14pt;
 }
+
+/* ========== Tile Styles ========== */
+
+/* Tile styling for game */
 .game-tile{
     -fx-background-radius: 5;
     -fx-border-radius: 1;
@@ -37,51 +59,83 @@
     -fx-min-height: 90pt;
     -fx-min-width: 90pt;
 }
+
+/* ========== Win/Lose Styles ========== */
+
+/* Text styling for win/lose messages */
 .game-win-lose-text{
     -fx-alignment: center;
     -fx-font-size: 46pt;
     -fx-text-fill: rgb(118, 110, 101);
     -fx-padding: 0 10 0 10;
 }
+
+/* Background styling for win/lose messages */
 .game-win-lose-background{
     -fx-background-color: rgba(218, 217, 208, 0.65);
     -fx-background-radius: 5;
     -fx-alignment: center;
 }
+
+/* ========== Score Styles ========== */
+
+/* Text styling for score */
 .score-text{
     -fx-text-fill: rgb(255,255,255);
     -fx-font-size: 18pt;
 }
+
+/* Margin styling for score */
 .score-margin{
     -fx-padding: 2px;
     -fx-border-insets: 2px;
     -fx-background-insets: 2px;
 }
+
+/* ========== Scroll Pane Styles ========== */
+
+/* Styling for scroll pane */
+.scroll-pane {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* Styling for scroll pane viewport */
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ========== Additional Styles ========== */
+
+/* Animated text styling */
 .animated{
     -fx-text-fill: rgba(118, 110, 101, 0.60);
 }
+
+/* Padding for directions */
 .directions-padding{
     -fx-padding: 0 0 0 43;
 }
+
+/* Bold text styling */
 .bold{
     -fx-font-weight: bold;
 }
+
+/* Underlined text styling */
 .underline{
     -fx-underline: true;
 }
+
+/* Margin styling */
 .margin {
     -fx-padding: 7px;
     -fx-border-insets: 7px;
     -fx-background-insets: 7px;
 }
+
+/* Border styling for debugging */
 .border{
     -fx-border-width: 1px;
     -fx-border-color: red;
-}
-.scroll-pane {
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
-}
-.scroll-pane .viewport {
-    -fx-background-color: transparent;
 }
