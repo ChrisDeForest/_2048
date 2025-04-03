@@ -1,7 +1,7 @@
 /**
  * Package and imports for the Controller class.
  */
-package com.chrisdeforest._2048;
+package com._2048;
 
 // JavaFX and other necessary imports
 import javafx.animation.*;
@@ -52,6 +52,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 game.moveHorizontal(0, "left");
                 break;
         }
+        keyEvent.consume();
     };
 
     // Static UI elements
@@ -102,6 +103,29 @@ public class Controller extends Application implements PropertyChangeListener {
         scroll.setPannable(true);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setContent(content);
+        // prevent ScrollPane from scrolling with arrow keys
+        scroll.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            switch (event.getCode()) {
+                case UP:
+                case DOWN:
+                case LEFT:
+                case RIGHT:
+                case KP_UP:
+                case KP_DOWN:
+                case KP_LEFT:
+                case KP_RIGHT:
+                case W:
+                case A:
+                case S:
+                case D:
+                    // Handle the key event
+                    keyEventHandler.handle(event);
+
+                    // Prevent the ScrollPane from handling it
+                    event.consume();
+                    break;
+            }
+        });
 
         // Scene and stage settings
         scene = new Scene(scroll);
@@ -191,7 +215,7 @@ public class Controller extends Application implements PropertyChangeListener {
 
         // Creating a clickable "How to play" button
         Label howTo = new Label("How to play -->\n");
-        howTo.getStyleClass().addAll("directions-padding", "underline", "bold", "game-text");
+        howTo.getStyleClass().addAll("directions-padding", "underline", "bold", "game-text", "how-to-play");
         howTo.setOnMouseClicked(event ->{
             Timeline timeLine = new Timeline();
             KeyFrame keyFrame = new KeyFrame(SCROLLING_ANIMATION_TIME,
@@ -354,6 +378,7 @@ public class Controller extends Application implements PropertyChangeListener {
 
         return stack;
     }
+
     /**
      * Creates a StackPane for displaying the game over screen when the game ends.
      *
@@ -439,7 +464,7 @@ public class Controller extends Application implements PropertyChangeListener {
             timeLine.getKeyFrames().add(keyFrame);
             timeLine.play();
         });
-        line4_1.getStyleClass().addAll("underline", "bold");
+        line4_1.getStyleClass().addAll("underline", "bold", "return-to-top");
         line4.getChildren().addAll(line4_1);
 
         // Creating appropriate margins around the lines
@@ -497,7 +522,7 @@ public class Controller extends Application implements PropertyChangeListener {
                                         spacesToMove++;
                                 }
                                 // Animate the tile moving up
-                                tileAnimations.getChildren().addAll(createTileMoveAnimation(j, i, j, i - spacesToMove));
+                                tileAnimations.getChildren().addAll(createTileMoveAnimation(quick, j, i, j, i - spacesToMove));
                             }
                         }
                     }
@@ -533,7 +558,7 @@ public class Controller extends Application implements PropertyChangeListener {
                                         spacesToMove++;
                                 }
                                 // Animate the tile moving down
-                                tileAnimations.getChildren().addAll(createTileMoveAnimation(j, i, j, i + spacesToMove));
+                                tileAnimations.getChildren().addAll(createTileMoveAnimation(quick, j, i, j, i + spacesToMove));
                             }
                         }
                     }
@@ -569,7 +594,7 @@ public class Controller extends Application implements PropertyChangeListener {
                                         spacesToMove++;
                                 }
                                 // Animate the tile moving right
-                                tileAnimations.getChildren().addAll(createTileMoveAnimation(j, i, j + spacesToMove, i));
+                                tileAnimations.getChildren().addAll(createTileMoveAnimation(quick, j, i, j + spacesToMove, i));
                             }
                         }
                     }
@@ -605,7 +630,7 @@ public class Controller extends Application implements PropertyChangeListener {
                                         spacesToMove++;
                                 }
                                 // Animate the tile moving left
-                                tileAnimations.getChildren().addAll(createTileMoveAnimation(j, i, j - spacesToMove, i));
+                                tileAnimations.getChildren().addAll(createTileMoveAnimation(quick, j, i, j - spacesToMove, i));
                             }
                         }
                     }
@@ -628,10 +653,7 @@ public class Controller extends Application implements PropertyChangeListener {
     private PauseTransition getPauseTransition(boolean quick) {
         // Determining the speed at which the animation plays
         Duration time;
-        if (quick)
-            time = Duration.seconds(0);
-        else
-            time = ANIMATION_TIME;
+        time = quick ? Duration.seconds(0) : ANIMATION_TIME;
 
         // Creating a pause animation to pause GUI updates
         PauseTransition pause = new PauseTransition(time);
@@ -657,7 +679,7 @@ public class Controller extends Application implements PropertyChangeListener {
                     // If the tile has just been generated, play it's appear animation
                     if (game.getBoard()[i][j].getMoveGenerated() == game.getMoveCount() && !game.getBoard()[i][j].getAnimationPlayed()) {
                         labelGrid[j][i].setOpacity(0);
-                        playTileAppearAnimation(labelGrid[j][i]);
+                        playTileAppearAnimation(quick, labelGrid[j][i]);
                         game.getBoard()[i][j].setAnimationPlayed(true);
                     }
                 }
@@ -727,14 +749,16 @@ public class Controller extends Application implements PropertyChangeListener {
      *
      * @param label Label representing the tile.
      */
-    private void playTileAppearAnimation(Label label){
+    private void playTileAppearAnimation(boolean quick, Label label){
+        Duration time = quick ? Duration.seconds(0.001) : Duration.seconds(0.2);
+
         // Creates a fade transition to fade the tile into view
-        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.2), label);
+        FadeTransition fadeTransition = new FadeTransition(time, label);
         fadeTransition.setFromValue(0);
         fadeTransition.setToValue(1);
 
         // Creates a scale transition to scale the tile
-        ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.2), label);
+        ScaleTransition scaleTransition = new ScaleTransition(time, label);
         scaleTransition.setFromX(0);
         scaleTransition.setFromY(0);
         scaleTransition.setToX(1);
@@ -757,7 +781,7 @@ public class Controller extends Application implements PropertyChangeListener {
      * @return TranslateTransition animation object.
      */
     @NotNull
-    public TranslateTransition createTileMoveAnimation(int startX, int startY, int endX, int endY){
+    public TranslateTransition createTileMoveAnimation(boolean quick, int startX, int startY, int endX, int endY){
         Label label = labelGrid[startX][startY];
         // Disable keyboard input until animation has played
         scene.setOnKeyPressed(null);
@@ -768,7 +792,7 @@ public class Controller extends Application implements PropertyChangeListener {
         double translateY = (endY - startY) * TILE_SIZE;
 
         // Creating the TranslateTransition that moves the tile
-        return getTranslateTransition(label, translateX, translateY);
+        return getTranslateTransition(quick, label, translateX, translateY);
     }
 
     /**
@@ -780,9 +804,10 @@ public class Controller extends Application implements PropertyChangeListener {
      * @return TranslateTransition animation object.
      */
     @NotNull
-    private TranslateTransition getTranslateTransition(Label label, double translateX, double translateY) {
+    private TranslateTransition getTranslateTransition(boolean quick, Label label, double translateX, double translateY) {
         // Creating a translation transition which will move the tiles
-        TranslateTransition translate = new TranslateTransition(ANIMATION_TIME, label);
+        TranslateTransition translate;
+        translate = quick ? new TranslateTransition(Duration.seconds(0), label) : new TranslateTransition(ANIMATION_TIME, label);
 
         // Assigning values to various translation properties
         translate.setByX(translateX);
@@ -805,13 +830,15 @@ public class Controller extends Application implements PropertyChangeListener {
      */
     @Override
     public void propertyChange(PropertyChangeEvent event) {
+        // boolean flags for animation speed
+        boolean newGameQuick = true, moveQuick = false;
         // Switch statement regarding the contents of the event change
         switch (event.getPropertyName()) {
             // If a "newGame" event is called, reset and start a new game
             case "newGame":
                 scene.setOnKeyPressed(keyEventHandler);
                 windowStack.getChildren().set(1, new Label());
-                updateTiles(true, null);
+                updateTiles(newGameQuick, null);
                 break;
             // If an "up" event is called, try to move the tiles up and generate a new one
             case "up":
@@ -821,7 +848,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 if ((int) event.getNewValue() == 1) {
                     game.generateTile(game.getDebug());
                 }
-                updateTiles(false, "up");
+                updateTiles(moveQuick, "up");
                 game.checkForWin();
                 break;
             // If a "right" event is called, try to move the tiles right and generate a new one
@@ -832,7 +859,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile(game.getDebug());
-                updateTiles(false, "right");
+                updateTiles(moveQuick, "right");
                 game.checkForWin();
                 break;
             // If a "down" event is called, try to move the tiles down and generate a new one
@@ -843,7 +870,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile(game.getDebug());
-                updateTiles(false, "down");
+                updateTiles(moveQuick, "down");
                 game.checkForWin();
                 break;
             // If a "left" event is called, try to move the tiles left and generate a new one
@@ -854,7 +881,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile(game.getDebug());
-                updateTiles(false, "left");
+                updateTiles(moveQuick, "left");
                 game.checkForWin();
                 break;
             // If a "score" event is called, update the score

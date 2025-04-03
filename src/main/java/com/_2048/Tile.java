@@ -4,7 +4,7 @@
  * a text color, and a font size based on its value. It also tracks whether an animation
  * has been played and the move in which it was generated.
  */
-package com.chrisdeforest._2048;
+package com._2048;
 
 /**
  * The Tile class represents a tile in the 2048 game.

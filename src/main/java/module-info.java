@@ -13,6 +13,6 @@ module com.chrisdeforest._2048 {
     requires java.desktop;
     requires annotations;
 
-    opens com.chrisdeforest._2048 to javafx.fxml;
-    exports com.chrisdeforest._2048;
+    opens com._2048 to javafx.fxml;
+    exports com._2048;
 }

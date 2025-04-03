@@ -37,6 +37,11 @@
     -fx-padding: 0 0 0 41;
 }
 
+.how-to-play:hover, .return-to-top:hover {
+    -fx-cursor: hand;
+}
+
+
 /* ========== Button Styles ========== */
 
 /* Button styling for game */
@@ -45,6 +50,31 @@
     -fx-text-fill: rgb(250, 246, 241);
     -fx-text-alignment: center;
     -fx-font-size: 14pt;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 2px;
+    -fx-border-radius: 2px;
+
+    -fx-opacity: 1.0;
+
+    /*-fx-transition: -fx-background-color 0.5s, -fx-text-fill 0.5s,*/
+    /*                -fx-border-color 0.5s, -fx-border-width 0.5s,*/
+    /*                -fx-border-radius 0.5s, -fx-background-radius 0.5s;*/
+    -fx-transition: -fx-opacity 0.5s;
+}
+
+.game-button:hover{
+    -fx-cursor: hand;
+
+    /*-fx-background-color: rgb(250, 246, 241);*/
+    /*-fx-text-fill: rgb(144, 122, 102);*/
+    /*-fx-border-color: rgb(144, 122, 102);*/
+    /*-fx-border-width: 2px;*/
+    /*-fx-border-radius: 2px;*/
+
+    -fx-opacity: 0.9;
+
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 5, 5);
 }
 
 /* ========== Tile Styles ========== */

@@ -4,7 +4,7 @@
  * It handles the game state, tile generation, board manipulation,
  * and game-over/win conditions.
  */
-package com.chrisdeforest._2048;
+package com._2048;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -139,7 +139,7 @@ public class Game {
             System.out.println(this);
         } else { // Default random tile generation
             if ((!gameWon || continued) && !gameOver) {
-                int t1 = ((rand.nextInt(1, 5) % 4) == 0) ? 4 : 2, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
+                int t1 = ((rand.nextInt(1, 6) % 4) == 0) ? 4 : 2, r1 = rand.nextInt(4), c1 = rand.nextInt(4);
                 while (board[r1][c1].isNotEmpty()) {
                     r1 = rand.nextInt(4);
                     c1 = rand.nextInt(4);
