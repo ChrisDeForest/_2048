@@ -34,10 +34,10 @@ public class GameState {
     @Override
     public String toString() {
         return "GameState{ " +
-                "currentScore = " + this.currentScore +
-                "bestScore = " + this.bestScore +
-                "isGameOver = " + this.gameOver +
-                "boardState = " + Arrays.deepToString(this.boardState) +
+                "currentScore=" + this.currentScore +
+                ", bestScore=" + this.bestScore +
+                ", isGameOver=" + this.gameOver +
+                ", boardState=" + Arrays.deepToString(this.boardState) +
                 "}";
     }
 }
