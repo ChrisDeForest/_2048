@@ -2,15 +2,18 @@ package com.state;
 
 import java.util.Arrays;
 
+import static com._2048.Game.BOARD_SIZE;
+
 public class GameState {
     private int currentScore, bestScore;
-    private boolean gameOver;
+    private boolean gameOver, gameWon;
     private int[][] boardState;
 
-    public GameState(int currentScore, int bestScore, boolean gameOver, int[][] boardState) {
+    public GameState(int currentScore, int bestScore, boolean gameOver, boolean gameWon, int[][] boardState) {
         this.currentScore = currentScore;
         this.bestScore = bestScore;
         this.gameOver = gameOver;
+        this.gameWon = gameWon;
         this.boardState = boardState;
     }
 
@@ -26,6 +29,8 @@ public class GameState {
         return gameOver;
     }
     public void setGameOver(boolean gameOver) { this.gameOver = gameOver; }
+    public boolean isGameWon() { return gameWon; }
+    public void setGameWon(boolean gameWon) { this.gameWon = gameWon; }
     public int[][] getBoardState() {
         return boardState;
     }
@@ -39,5 +44,18 @@ public class GameState {
                 ", isGameOver=" + this.gameOver +
                 ", boardState=" + Arrays.deepToString(this.boardState) +
                 "}";
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof GameState gameState) {
+            for (int i = 0; i < BOARD_SIZE; i++) {
+                for (int j = 0; j < BOARD_SIZE; j++) {
+                    if (this.boardState[i][j] != gameState.getBoardState()[i][j])
+                        return false;
+                }
+            }
+        }
+        return true;
     }
 }

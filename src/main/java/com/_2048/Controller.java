@@ -5,7 +5,9 @@ package com._2048;
 
 // JavaFX and other necessary imports
 import com.socket.GameStateServer;
+import com.state.GameState;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -250,5 +252,32 @@ public class Controller extends Application implements PropertyChangeListener {
                 ui.playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));
                 break;
         }
+        // broadcast the current game state to the socket connection
+        broadcastCurrentGameState();
+//        System.out.println();
+    }
+
+    /**
+     * Broadcasts the current game state on a background thread to the gameServer socket
+     */
+    private void broadcastCurrentGameState() {
+        // This runs on a background thread to avoid freezing the UI
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() {
+                GameState currentState = new GameState(
+                        game.getNewScore(),
+                        game.getBestScore(),
+                        game.getGameOver(),
+                        game.getGameWon(),
+                        game.getIntBoard()
+                );
+
+                gameServer.broadcastGameState(currentState);
+                return null;
+            }
+        };
+
+        new Thread(task).start();
     }
 }

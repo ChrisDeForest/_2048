@@ -8,6 +8,7 @@ package com._2048;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -362,6 +363,18 @@ public class Game {
         return this.board;
     }
 
+    public int[][] getIntBoard() {
+        int[][] board = new int[BOARD_SIZE][BOARD_SIZE];
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                board[i][j] = this.board[i][j].getValue();
+            }
+        }
+//        System.out.println("BOARD");
+//        System.out.println(Arrays.deepToString(board)); // todo remove this once testing is done
+        return board;
+    }
+
     /**
      * Returns whether the game has been won.
      *
@@ -370,6 +383,13 @@ public class Game {
     public boolean getGameWon(){
         return this.gameWon;
     }
+
+    /**
+     * Returns whether the game is over.
+     *
+     * @return True if the game is over, false otherwise
+     */
+    public boolean getGameOver() { return this.gameOver; }
 
     /**
      * Returns the old score (before the last move).
