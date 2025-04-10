@@ -57,6 +57,11 @@ public class Controller extends Application implements PropertyChangeListener {
     private GameStateServer gameServer;
     private StackPane windowStack;
 
+    public static Game getGame(){ return game; }
+    public static ScrollPane getScrollPane(){ return scroll; }
+    public static Scene getScene(){ return scene; }
+    public static EventHandler<KeyEvent> getKeyEventHandler(){ return keyEventHandler; }
+
     /**
      * Main method to launch the JavaFX application.
      *
@@ -65,11 +70,6 @@ public class Controller extends Application implements PropertyChangeListener {
     public static void main(String[] args) {
         Application.launch();
     }
-
-    public static Game getGame(){ return game; }
-    public static ScrollPane getScrollPane(){ return scroll; }
-    public static Scene getScene(){ return scene; }
-    public static EventHandler<KeyEvent> getKeyEventHandler(){ return keyEventHandler; }
 
     /**
      * Initialization method to create a new Game instance and register as a property change listener.

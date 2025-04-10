@@ -8,7 +8,6 @@ package com._2048;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -129,14 +128,14 @@ public class Game {
         // Debug mode: Custom tile generation for testing
         if(debug){
             int pos = 0, val = 2;
-            this.board[pos][pos].setValue(val*16);
+            this.board[pos][pos].setValue(val);
             this.board[pos][pos].setMoveGenerated(this.moveCount);
-            this.board[pos+1][pos].setValue(val*4);
-            this.board[pos+1][pos].setMoveGenerated(this.moveCount);
-            this.board[pos+2][pos].setValue(val);
-            this.board[pos+2][pos].setMoveGenerated(this.moveCount);
-            this.board[pos+3][pos].setValue(val*4);
-            this.board[pos+3][pos].setMoveGenerated(this.moveCount);
+            this.board[pos][pos+1].setValue(val);
+            this.board[pos][pos+1].setMoveGenerated(this.moveCount);
+            this.board[pos][pos+2].setValue(val);
+            this.board[pos][pos+2].setMoveGenerated(this.moveCount);
+            this.board[pos][pos+3].setValue(val);
+            this.board[pos][pos+3].setMoveGenerated(this.moveCount);
             System.out.println(this);
         } else { // Default random tile generation
             if ((!gameWon || continued) && !gameOver) {
@@ -264,32 +263,47 @@ public class Game {
      * @param direction The direction of the move ("up", "down", "left", "right").
      * @return The condensed list of tiles
      */
-    public List<Tile> condense(List<Tile> list, String direction){
-        if(direction.equals("up") || direction.equals("left")){
-            for(int j = 0; j < BOARD_SIZE - 1; j++){
-                if(list.get(j).getValue() != 0 && list.get(j + 1).getValue() != 0 && (list.get(j).getValue() == list.get(j + 1).getValue())){
-                    list.set(j, new Tile(list.get(j).getValue() * 2));
-                    list.set(j + 1, new Tile());
-                    this.newScore = this.newScore + (list.get(j).getValue());
-                    break;
-                }
-            }
-        } else if(direction.equals("down") || direction.equals("right")){
-            for(int j = BOARD_SIZE - 1; j > 0; j--){
-                if(list.get(j).getValue() != 0 && list.get(j - 1).getValue() != 0 && (list.get(j).getValue() == list.get(j - 1).getValue())){
-                    list.set(j, new Tile(list.get(j).getValue() * 2));
-                    list.set(j - 1, new Tile());
-                    this.newScore = this.newScore + (list.get(j).getValue());
-                    break;
-                }
+    public List<Tile> condense(List<Tile> list, String direction) {
+        // remove empty tiles
+        List<Tile> nonEmpty = new LinkedList<>();
+        for (Tile t : list) {
+            if (t.isNotEmpty()) nonEmpty.add(t);
+        }
+
+        // continuously merge adjacent equal tiles
+        List<Tile> merged = new LinkedList<>();
+        int i = 0;
+        while (i < nonEmpty.size()) {
+            if (i + 1 < nonEmpty.size() &&
+                    nonEmpty.get(i).getValue() == nonEmpty.get(i + 1).getValue()) {
+                int mergedValue = nonEmpty.get(i).getValue() * 2;
+                merged.add(new Tile(mergedValue));
+                this.newScore += mergedValue;
+                i += 2; // skip next tile
+            } else {
+                merged.add(new Tile(nonEmpty.get(i).getValue()));
+                i++;
             }
         }
-        if(this.newScore >= this.bestScore)
+
+        // pad empty spaces with empty tiles
+        int missing = BOARD_SIZE - merged.size();
+        for (int j = 0; j < missing; j++) {
+            if (direction.equals("up") || direction.equals("left"))
+                merged.add(new Tile());
+            else
+                merged.add(0, new Tile());
+        }
+
+        // update score and notify win-check
+        if (this.newScore >= this.bestScore)
             this.setBestScore(this.newScore);
         this.support.firePropertyChange("score", null, 0);
         checkForWin();
-        return list;
+
+        return merged;
     }
+
 
     /**
      * Checks if the game has been won (i.e., a tile with the winning score has been created).
