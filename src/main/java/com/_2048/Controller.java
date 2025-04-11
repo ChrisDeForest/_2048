@@ -254,7 +254,6 @@ public class Controller extends Application implements PropertyChangeListener {
         }
         // broadcast the current game state to the socket connection
         broadcastCurrentGameState();
-//        System.out.println();
     }
 
     /**

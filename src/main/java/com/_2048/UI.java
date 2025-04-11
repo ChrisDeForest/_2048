@@ -24,6 +24,8 @@ public class UI {
     private static final StackPane scoreStack = new StackPane();
     public static Label[][] labelGrid = new Label[4][4];
 
+    private Animation currentAnimation = null;
+
     /**
      * Creates and initializes the game grid with tiles.
      *
@@ -351,8 +353,14 @@ public class UI {
      * @param direction The direction of movement ("up", "down", "left", "right").
      */
     public void updateTiles(boolean quick, String direction) {
+        // Prevent a new animation from running if there is one running
+        if (currentAnimation != null && currentAnimation.getStatus() == Animation.Status.RUNNING) {
+            return;
+        }
         // Updating the game's score and playing the score animation
         updateScore();
+        // Disabling input while animation is playing (it is re-enabled per tile I think)
+        Controller.getScene().setOnKeyPressed(null);
         // Creating a ParallelTransition that will hold all the tile movement animations
         ParallelTransition tileAnimations = new ParallelTransition();
         if (direction != null && !Controller.getGame().getGameWon()) {
@@ -506,6 +514,7 @@ public class UI {
         // Creating a PauseTransition that pauses GUI updating until the tile's moving animation completes
         PauseTransition pause = getPauseTransition(quick);
         tileAnimations.play();
+        currentAnimation = tileAnimations;
         pause.play();
     }
 
