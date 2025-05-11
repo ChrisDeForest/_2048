@@ -11,8 +11,10 @@ import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -27,6 +29,19 @@ import java.beans.PropertyChangeListener;
  * PropertyChangeListener for game state updates.
  */
 public class Controller extends Application implements PropertyChangeListener {
+
+    // Static UI elements
+    private final static ScrollPane scroll = new ScrollPane();
+    private static Scene scene;
+    private static Game game;
+    private static UI ui;
+    private GameStateServer gameServer;
+    private StackPane windowStack;
+
+    public static Game getGame(){ return game; }
+    public static ScrollPane getScrollPane(){ return scroll; }
+    public static Scene getScene(){ return scene; }
+    public static EventHandler<KeyEvent> getKeyEventHandler(){ return keyEventHandler; }
 
     /**
      * Event handler for keyboard input to control game movements.
@@ -45,22 +60,15 @@ public class Controller extends Application implements PropertyChangeListener {
             case LEFT, A, KP_LEFT:
                 Controller.getGame().moveHorizontal(0, "left");
                 break;
+            case ENTER:
+                if (game.getGameOver()){
+
+                }
+                break;
+
         }
         keyEvent.consume();
     };
-
-    // Static UI elements
-    private final static ScrollPane scroll = new ScrollPane();
-    private static Scene scene;
-    private static Game game;
-    private static UI ui;
-    private GameStateServer gameServer;
-    private StackPane windowStack;
-
-    public static Game getGame(){ return game; }
-    public static ScrollPane getScrollPane(){ return scroll; }
-    public static Scene getScene(){ return scene; }
-    public static EventHandler<KeyEvent> getKeyEventHandler(){ return keyEventHandler; }
 
     /**
      * Main method to launch the JavaFX application.
@@ -137,6 +145,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 case A:
                 case S:
                 case D:
+                case ENTER:
                     // Handle the key event
                     keyEventHandler.handle(event);
 
@@ -185,12 +194,15 @@ public class Controller extends Application implements PropertyChangeListener {
                 scene.setOnKeyPressed(keyEventHandler);
                 windowStack.getChildren().set(1, new Label());
                 ui.updateTiles(newGameQuick, null);
+                broadcastCurrentGameState();    // broadcast the current game state to the socket connection
                 break;
             // If an "up" event is called, try to move the tiles up and generate a new one
             case "up":
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
-                    game.moveVertical(1, "up");}
+                    game.moveVertical(1, "up");
+                    broadcastCurrentGameState();    // broadcast the current game state to the socket connection
+                }
                 if ((int) event.getNewValue() == 1) {
                     game.generateTile(game.getDebug());
                 }
@@ -202,6 +214,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveHorizontal(1, "right");
+                    broadcastCurrentGameState();    // broadcast the current game state to the socket connection
                 }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile(game.getDebug());
@@ -213,6 +226,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveVertical(1, "down");
+                    broadcastCurrentGameState();    // broadcast the current game state to the socket connection
                 }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile(game.getDebug());
@@ -224,6 +238,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 game.setOldScore(game.getNewScore());
                 if ((int) event.getOldValue() == -1) {
                     game.moveHorizontal(1, "left");
+                    broadcastCurrentGameState();    // broadcast the current game state to the socket connection
                 }
                 if ((int) event.getNewValue() == 1)
                     game.generateTile(game.getDebug());
@@ -238,7 +253,7 @@ public class Controller extends Application implements PropertyChangeListener {
             case "won game":
                 scene.setOnKeyPressed(null);
                 windowStack.getChildren().set(1, ui.createWinScreen());
-                ui.playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));
+                ui.playAnimatedWinOrLoseScreen((StackPane) windowStack.getChildren().get(1));
                 break;
             // If a "continue" event is called, resume the game and re-enable key presses
             case "continue":
@@ -249,10 +264,9 @@ public class Controller extends Application implements PropertyChangeListener {
             case "game over":
                 scene.setOnKeyPressed(null);
                 windowStack.getChildren().set(1, ui.createGameOverScreen());
-                ui.playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));
+                ui.playAnimatedWinOrLoseScreen((StackPane) windowStack.getChildren().get(1));
                 break;
         }
-        broadcastCurrentGameState();    // broadcast the current game state to the socket connection
     }
 
     /**

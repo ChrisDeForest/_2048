@@ -270,6 +270,7 @@ public class UI {
         Button tryAgain = new Button("Try again");
         EventHandler<ActionEvent> tryAgainAction = event -> Controller.getGame().newGame();
         tryAgain.setOnAction(tryAgainAction);
+        tryAgain.setDefaultButton(true);
         tryAgain.getStyleClass().addAll("game-button", "bold");
 
         // arranging the elements within a group
