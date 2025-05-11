@@ -62,7 +62,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             case ENTER:
                 if (game.getGameOver()){
-
+                    game.newGame();     // simulate 'clicking' the game over/new game button
                 }
                 break;
 
@@ -262,7 +262,12 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             // If a "game over" event is called, display the "game over" screen and disable key presses
             case "game over":
-                scene.setOnKeyPressed(null);
+//                scene.setOnKeyPressed(null);      todo maybe put back just commented out for testing
+                scene.setOnKeyPressed(e -> {
+                    if (e.getCode() == KeyCode.ENTER) {
+                        game.newGame();  // simulate 'clicking' the game over/new game button
+                    }
+                });
                 windowStack.getChildren().set(1, ui.createGameOverScreen());
                 ui.playAnimatedWinOrLoseScreen((StackPane) windowStack.getChildren().get(1));
                 break;
