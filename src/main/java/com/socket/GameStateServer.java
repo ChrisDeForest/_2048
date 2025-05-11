@@ -1,32 +1,30 @@
 package com.socket;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.state.GameState;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class GameStateServer {
-    // Port number to use (choose any unused port)
     private static final int PORT = 5999;
     private ServerSocket serverSocket;
     private Socket clientSocket;
-    private ObjectOutputStream outputStream;
+    private BufferedWriter writer;
 
     public void start() {
         try {
-            // Create server socket that listens on the specified port
             serverSocket = new ServerSocket(PORT);
             System.out.println("Game server started on port " + PORT);
             System.out.println("Waiting for client to connect...");
 
-            // Accept connection from client (blocks until client connects)
             clientSocket = serverSocket.accept();
             System.out.println("Client connected: " + clientSocket.getInetAddress());
 
-            // Create output stream to send game state objects to client
-            outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+            // Use BufferedWriter for sending plain text (JSON) over the socket
+            writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"));
 
         } catch (IOException e) {
             System.err.println("Error starting server: " + e.getMessage());
@@ -36,20 +34,25 @@ public class GameStateServer {
 
     public void broadcastGameState(GameState gameState) {
         try {
-            if (outputStream != null) {
-                outputStream.writeObject(gameState);
-                outputStream.flush();
-                System.out.println("Broadcast: " + gameState);
+            if (writer != null) {
+                Gson gson = new Gson();
+                String json = gson.toJson(gameState);
+                writer.write(json + "\n"); // newline for clean message parsing
+                writer.flush();
+                System.out.println("Broadcast: " + json);
             }
         } catch (IOException e) {
             System.err.println("Error broadcasting game state: " + e.getMessage());
             e.printStackTrace();
+        } catch (Exception ex) {
+            System.err.println("❌ Error during JSON serialization:");
+            ex.printStackTrace();
         }
     }
 
     public void stop() {
         try {
-            if (outputStream != null) outputStream.close();
+            if (writer != null) writer.close();
             if (clientSocket != null) clientSocket.close();
             if (serverSocket != null) serverSocket.close();
             System.out.println("Server stopped");

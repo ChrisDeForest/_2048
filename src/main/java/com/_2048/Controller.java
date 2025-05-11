@@ -79,8 +79,8 @@ public class Controller extends Application implements PropertyChangeListener {
         game = new Game();
         game.addPropertyChangeListener(this);
         ui = new UI();
-//        gameServer = new GameStateServer();
-//        gameServer.start();
+        gameServer = new GameStateServer();
+        gameServer.start();
     }
 
     /**
