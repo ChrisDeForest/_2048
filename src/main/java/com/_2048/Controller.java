@@ -252,8 +252,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 ui.playAnimatedWinOrLoseScreen((StackPane)windowStack.getChildren().get(1));
                 break;
         }
-        // broadcast the current game state to the socket connection
-        broadcastCurrentGameState();
+        broadcastCurrentGameState();    // broadcast the current game state to the socket connection
     }
 
     /**
