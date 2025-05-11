@@ -12,7 +12,9 @@ module com.chrisdeforest._2048 {
     requires com.almasb.fxgl.all;
     requires java.desktop;
     requires annotations;
+    requires com.google.gson;
 
     opens com._2048 to javafx.fxml;
+    opens com.state to com.google.gson;
     exports com._2048;
 }
