@@ -38,6 +38,10 @@ public class Controller extends Application implements PropertyChangeListener {
     private GameStateServer gameServer;
     private StackPane windowStack;
 
+    // Other statics/constants
+    private static String windowTitle = "2048 FX";
+    private static int port = 5999;
+
     public static Game getGame(){ return game; }
     public static ScrollPane getScrollPane(){ return scroll; }
     public static Scene getScene(){ return scene; }
@@ -76,7 +80,13 @@ public class Controller extends Application implements PropertyChangeListener {
      * @param args Command-line arguments (unused).
      */
     public static void main(String[] args) {
-        Application.launch();
+        if (args.length >= 1){
+            port = Integer.parseInt(args[0]);
+        }
+        if (args.length >= 2){
+            windowTitle = args[1];
+        }
+        Application.launch(args);
     }
 
     /**
@@ -88,7 +98,7 @@ public class Controller extends Application implements PropertyChangeListener {
         game.addPropertyChangeListener(this);
         ui = new UI();
         gameServer = new GameStateServer();
-        gameServer.start();
+        gameServer.start(port);
     }
 
     /**
@@ -163,7 +173,7 @@ public class Controller extends Application implements PropertyChangeListener {
         stage.setHeight(800);
         stage.setWidth(550);
         stage.setResizable(false);
-        stage.setTitle("2048 FX");
+        stage.setTitle(windowTitle);
         stage.show();
         game.newGame();
     }
@@ -262,12 +272,7 @@ public class Controller extends Application implements PropertyChangeListener {
                 break;
             // If a "game over" event is called, display the "game over" screen and disable key presses
             case "game over":
-//                scene.setOnKeyPressed(null);      todo maybe put back just commented out for testing
-                scene.setOnKeyPressed(e -> {
-                    if (e.getCode() == KeyCode.ENTER) {
-                        game.newGame();  // simulate 'clicking' the game over/new game button
-                    }
-                });
+                scene.setOnKeyPressed(null);
                 windowStack.getChildren().set(1, ui.createGameOverScreen());
                 ui.playAnimatedWinOrLoseScreen((StackPane) windowStack.getChildren().get(1));
                 break;

@@ -9,15 +9,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class GameStateServer {
-    private static final int PORT = 5999;
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private BufferedWriter writer;
 
-    public void start() {
+    public void start(int port) {
         try {
-            serverSocket = new ServerSocket(PORT);
-            System.out.println("Game server started on port " + PORT);
+            serverSocket = new ServerSocket(port);
+            System.out.println("Game server started on port " + port);
             System.out.println("Waiting for client to connect...");
 
             clientSocket = serverSocket.accept();
