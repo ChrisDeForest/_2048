@@ -11,13 +11,12 @@ import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import java.util.concurrent.*;
 
 
 import java.beans.PropertyChangeEvent;
@@ -29,6 +28,10 @@ import java.beans.PropertyChangeListener;
  * PropertyChangeListener for game state updates.
  */
 public class Controller extends Application implements PropertyChangeListener {
+
+    // A small, fixed pool for broadcasting game state
+    private static final ExecutorService BROADCAST_POOL =
+            Executors.newFixedThreadPool(2);
 
     // Static UI elements
     private final static ScrollPane scroll = new ScrollPane();
@@ -186,6 +189,15 @@ public class Controller extends Application implements PropertyChangeListener {
         if (gameServer != null) {
             gameServer.stop();
         }
+        BROADCAST_POOL.shutdown();  // no new tasks accepted
+        try {
+            if (!BROADCAST_POOL.awaitTermination(5, TimeUnit.SECONDS)) {
+                BROADCAST_POOL.shutdownNow();  // force-kill leftover tasks
+            }
+        } catch (InterruptedException e) {
+            BROADCAST_POOL.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**
@@ -196,7 +208,7 @@ public class Controller extends Application implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         // boolean flags for animation speed
-        boolean newGameQuick = true, moveQuick = false;
+        boolean newGameQuick = true, moveQuick = true;
         // Switch statement regarding the contents of the event change
         switch (event.getPropertyName()) {
             // If a "newGame" event is called, reset and start a new game
@@ -283,8 +295,7 @@ public class Controller extends Application implements PropertyChangeListener {
      * Broadcasts the current game state on a background thread to the gameServer socket
      */
     private void broadcastCurrentGameState() {
-        // This runs on a background thread to avoid freezing the UI
-        Task<Void> task = new Task<Void>() {
+        Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
                 GameState currentState = new GameState(
@@ -294,12 +305,11 @@ public class Controller extends Application implements PropertyChangeListener {
                         game.getGameWon(),
                         game.getIntBoard()
                 );
-
                 gameServer.broadcastGameState(currentState);
                 return null;
             }
         };
-
-        new Thread(task).start();
+        // Instead of new Thread(task).start();
+        BROADCAST_POOL.submit(task);
     }
 }

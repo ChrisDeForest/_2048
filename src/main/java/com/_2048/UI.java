@@ -559,9 +559,6 @@ public class UI {
                     if (labelGrid[i][j].getText().equals("0"))
                         labelGrid[i][j].setText("");
 
-                    // Adding proper styles to each tile
-                    labelGrid[j][i].getStyleClass().addAll("margin", "game-tile");
-
                     // If the tile has just been generated, play it's appear animation
                     if (Controller.getGame().getBoard()[i][j].getMoveGenerated() == Controller.getGame().getMoveCount()
                             && !Controller.getGame().getBoard()[i][j].getAnimationPlayed()) {

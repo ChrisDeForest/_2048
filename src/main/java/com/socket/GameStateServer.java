@@ -38,7 +38,7 @@ public class GameStateServer {
                 String json = gson.toJson(gameState);
                 writer.write(json + "\n"); // newline for clean message parsing
                 writer.flush();
-                System.out.println("Broadcast: " + json);
+                // System.out.println("Broadcast: " + json); this was just for testing
             }
         } catch (IOException e) {
             System.err.println("Error broadcasting game state: " + e.getMessage());
