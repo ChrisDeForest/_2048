@@ -68,11 +68,8 @@ public class Controller extends Application implements PropertyChangeListener {
                 Controller.getGame().moveHorizontal(0, "left");
                 break;
             case ENTER:
-                if (game.getGameOver()){
-                    game.newGame();     // simulate 'clicking' the game over/new game button
-                }
+                game.newGame();     // simulate 'clicking' the game over/new game button
                 break;
-
         }
         keyEvent.consume();
     };
