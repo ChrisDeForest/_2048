@@ -1,12 +1,25 @@
 package com.state;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Arrays;
 
 import static com._2048.Game.BOARD_SIZE;
 
 public class GameState {
-    private int currentScore, bestScore;
-    private boolean gameOver, gameWon;
+    @SerializedName("currentScore")
+    private int currentScore;
+
+    @SerializedName("bestScore")
+    private int bestScore;
+
+    @SerializedName("gameOver")
+    private boolean gameOver;
+
+    @SerializedName("gameWon")
+    private boolean gameWon;
+
+    @SerializedName("boardState")
     private int[][] boardState;
 
     public GameState(int currentScore, int bestScore, boolean gameOver, boolean gameWon, int[][] boardState) {
